@@ -20,7 +20,7 @@ function fib (int i): int{
   int _tres;
 
   if (i < 0){
-    tres = 1;
+    _tres = 1;
     return _tres
   }else{
     _t1 = i-1;
@@ -28,6 +28,7 @@ function fib (int i): int{
     _t2 = i-2;
     _t2 = fib(_t2);
     _tres = _t1 + _t2;
+    return _tres;
   }
 }
 ```
@@ -48,7 +49,7 @@ function fib (i int): int{
   int _tres;
 
   if (i < 0){
-    tres = 1;
+    _tres = 1;
     return _tres
   }else{
     _t1 = i-1;
@@ -56,6 +57,7 @@ function fib (i int): int{
     _t2 = i-2;
     _t2 = fib(_t2);
     _tres = _t1 + _t2;
+    return _tres;
   }
 }
 ```
