@@ -10,7 +10,9 @@ execute(attr1, attr2) -> result when {
 
 This means that the function with name ``execute`` will be running, and any return values will be piped into the local variable ``result``. The code within the ``when`` clause is executed whenever the function yields a value. When the function has finished execution code within the ``then`` clause will be executed, and all data within the execution will be wiped.  
 When a function is called asynchronously it is pushed to the event loop. If this execution is to be executed within another thread then when the function yields/returns a result the ``when``/``then`` clause will be executed within the thread that the function was originally called from.  
-This helps prevent data races within a function.
+This helps prevent data races within a function.  
+
+It is imporant to note that when a ``return`` occurs all but the return value is unallocated within the function's scope. This return value is then unallocated once the caller has transfered the information to it's local scope or other destination.
 
 
 This method of function calls is designed to eliminate the current methods being used for callbacks when reading a stream of data. Previously if you wanted to listen for TCP requests on a certain port you would need to define a new function specifically for this task, thus it will now have a different local scope from when it was called. However, within fabric, this can be done in a simpler way.
