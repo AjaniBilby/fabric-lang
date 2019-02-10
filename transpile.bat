@@ -1,0 +1,1 @@
+node transpiler/transpile.js %*
