@@ -1,7 +1,19 @@
 #include "./instance.hpp"
 
-Engine::Instance::Instance(Engine::Opperation ref, size_t heap){
-	this->funcRef    = ref;
-	this->local      = Memory::Allocate(heap);
+Engine::Instance::Instance(Engine::Opperation func, size_t domain, Instance* caller, size_t rtrnPos, size_t errPos, void* rtrnAddr = nullptr){
+	this->funcRef    = func;
+	this->local      = Memory::Allocate(domain);
+
+	this->parent     = caller;
+	this->returnPos  = rtrnPos;
+	this->returnAddr = rtrnAddr;
+	this->errorPos   = errPos;
+
 	this->designated = nullptr;
-}
+
+	this->sessions = 0;
+};
+
+void* Engine::Instance::GetLocal(){
+	return this->local;
+};

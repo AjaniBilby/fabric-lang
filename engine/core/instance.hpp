@@ -10,7 +10,17 @@ namespace Engine{
 		public:
 			Engine::ThreadPool::Worker* designated;
 
-			Instance(Engine::Opperation, size_t);
+			Instance(
+				// Execution description
+				Engine::Opperation func, // which function to execute
+				size_t domain,           // the size of it's local space
+
+				// Returning details
+				Instance* caller,        // which instance call this one
+				size_t rtrnPos,          // what position for the caller to execute from
+				size_t errPos,           // what position for the caller to execute from
+				void* rtrnAddr = nullptr // where to store the return value
+			);
 
 			// Helper
 			inline void* GetLocal();
