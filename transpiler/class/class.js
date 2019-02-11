@@ -123,7 +123,7 @@ class Class{
 
 		let lines = [];
 		for (let attr of this.attribute){
-			lines.push(`${attr.type.lable} ${attr.name}`);
+			lines.push(`${attr.type.lable} ${attr.name};`);
 		}
 
 		this.owner.owner.strucutres.push({
