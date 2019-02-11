@@ -2,6 +2,8 @@ const File = require('./file.js');
 const path = require('path');
 const fs   = require('fs');
 
+const Directive = require('./directive.js');
+
 class Project{
 	constructor(root){
 		this.files = [];
@@ -54,7 +56,8 @@ Project.prototype.compile = function(){
 Project.prototype.save = function(outputName){
 	let stream = fs.createWriteStream(outputName);
 
-	stream.write(`#include "./engine/engine.hpp"\n\n`);
+	let enginePath = path.join(__dirname, "./../../engine/engine.hpp");
+	stream.write(`#include "${enginePath}"\n`);
 
 
 	/*-----------------------------------
@@ -63,29 +66,44 @@ Project.prototype.save = function(outputName){
 	stream.write('namespace User{\n');
 	// Structures
 	for (let item of this.strucutres){
-		stream.write(`\tstruct ${item.name};\n`);
+		stream.write(`struct ${item.name};`);
 	}
 	// Functions
 	for (let item of this.functions){
-		stream.write(`\tvoid ${item.name}(Engine::Eventloop::Task task);\n`)
+		stream.write(`void ${item.name}(Engine::Eventloop::Task task);`);
 	}
 	stream.write('\n\n');
 
 
 
 	for (let item of this.strucutres){
-		stream.write(`\tstruct ${item.name}{\n`);
-		stream.write(`\t\t${item.lines.join(',\n\t\t')}`);
-		stream.write('\n\t};\n')
+		stream.write(`struct ${item.name}{`);
+		stream.write(`${item.lines.join('')}`);
+		stream.write('};\n')
 	}
 	stream.write("\n");
 
 	for (let item of this.functions){
-		stream.write(`\tvoid ${item.name}(Engine::Eventloop::Task task){\n`);
+		stream.write(`void ${item.name}(Engine::Eventloop::Task task){\n`);
 		for (let line of item.lines){
-			stream.write(`\t\t${line}\n`);
+			stream.write(`\t${line}\n`);
 		}
-		stream.write(`\t};\n`)
+		stream.write(`};\n`)
+	}
+
+	for (let file of this.files){
+		if (file.isRoot){
+			let res = file.get('main');
+			if ((res instanceof Directive) == false){
+				console.error(`Error: Root file does not include any definition of a 'main' function.`);
+				console.error(`  Please create, or import a 'main' function into module namespace`);
+				stream.close();
+				process.exit(1);
+				return;
+			}
+
+			stream.write(`\n#define ${res.lable} main\n`);
+		}
 	}
 
 	stream.write('};');
