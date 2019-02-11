@@ -20,7 +20,7 @@ class Class{
 		this.attribute   = data.attribute ? data.attribute : [];
 		this.isPrimivite = typeof(data.primitive) === "string";
 		this.primitive   = this.isPrimivite ? data.primitive : null;
-		this.lable       = this.isPrimivite ? this.primitive : `C${this.id}`;
+		this.lable       = this.isPrimivite ? this.primitive : `C_${this.id.toString(16)}`;
 	}
 
 	link(){

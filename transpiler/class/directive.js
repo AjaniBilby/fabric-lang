@@ -13,7 +13,7 @@ class Directive{
 		this.exposed = false;
 
 		this.id = owner.owner.GetUniqueFunctionID();
-		this.lable = "F"+this.id;
+		this.lable = "F_"+this.id.toString(16);
 		this.name = data.name;
 
 		if (!data.argument){
