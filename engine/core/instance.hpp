@@ -43,3 +43,5 @@ namespace Engine{
 			std::vector<Instance*>           child;
 	};
 };
+
+#include "./instance.cpp"

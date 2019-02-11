@@ -1,6 +1,6 @@
 #include "./instance.hpp"
 
-Engine::Instance::Instance(Engine::Opperation func, size_t domain, Instance* caller, size_t rtrnPos, size_t errPos, void* rtrnAddr = nullptr){
+Engine::Instance::Instance(Engine::Opperation func, size_t domain, Instance* caller, size_t rtrnPos, size_t errPos, void* rtrnAddr){
 	this->funcRef    = func;
 	this->local      = Memory::Allocate(domain);
 

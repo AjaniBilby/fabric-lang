@@ -1,5 +1,5 @@
 #pragma once
 
-#include "instance.hpp"
-#include "eventloop.hpp"
-#include "thread.hpp"
+#include "./core/instance.hpp"
+#include "./core/eventloop.hpp"
+#include "./core/thread.hpp"

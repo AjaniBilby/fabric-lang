@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 namespace Memory{
-	inline void* Allocate(size_t);
-	inline void Unallocate(void*);
+	void* Allocate(size_t);
+	void Unallocate(void*);
 }
+
+#include "./memory.cpp"

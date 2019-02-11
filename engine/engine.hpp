@@ -18,6 +18,10 @@ namespace Engine{
 	typedef void(*Opperation)(Eventloop::Task);
 };
 
+int main(){
+	// User::main();
+};
+
 
 
 #include "core.hpp"
