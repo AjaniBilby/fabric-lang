@@ -7,7 +7,7 @@ if (!process.argv[2]){
 }
 
 if (process.argv[2] == "-v"){
-	console.log('version: 0.0.0');
+	console.info('version: 0.0.0');
 	process.exit(0);
 }
 
@@ -23,7 +23,7 @@ if (proj.HasError()){
 	process.exit();
 }
 
-console.log('');
+console.info('');
 let outputPath = path.join(__dirname, './../', process.argv[3] || "a.cpp");
 proj.save(outputPath);
-console.log('Saved:', outputPath);
+console.info('Saved:', outputPath);

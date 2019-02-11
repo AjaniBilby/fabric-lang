@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
+const Interpret = require('./../interpreter/lexer.js');
+
 const Directive = require('./directive.js');
 const Project = require('./project.js');
 const Class = require('./class.js');
@@ -27,8 +29,11 @@ class File{
 
 		// Read in data
 		let data = {};
-		if (path.extname(filename) == ".json"){
+		let extension = path.extname(filename);
+		if (extension == ".json"){
 			data = JSON.parse( fs.readFileSync(filename, 'utf8') );
+		}else if (extension == ".fab"){
+			data = Interpret( fs.readFileSync(filename, 'utf8') );
 		}else{
 			console.error(`Invalid file type ${path.extname(filename)}`);
 			console.error(`  importer : ${importer}`);
@@ -146,7 +151,6 @@ class File{
 					return this.owner.files[item.id];
 				}
 				if (item.as == "*"){
-					console.log(149, item.id, this.owner);
 					return this.owner.files[item.id].get(name, ignore, history);
 				}
 			}

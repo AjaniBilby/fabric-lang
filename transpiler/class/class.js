@@ -15,7 +15,7 @@ class Class{
 		this.id = this.owner.owner.GetUniqueClassID();
 		this.name        = data.name;
 		this.line        = data.line || NaN;
-		this.extends     = data.extends ? data.extends : "wild";
+		this.extends     = data.extends ? data.extends : "Wild";
 		this.decendant   = [];
 		this.attribute   = data.attribute ? data.attribute : [];
 		this.isPrimivite = typeof(data.primitive) === "string";
