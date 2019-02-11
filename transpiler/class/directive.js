@@ -13,16 +13,52 @@ class Directive{
 		this.exposed = false;
 
 		this.id = owner.owner.GetUniqueFunctionID();
-		this.lable = "Func_"+this.id;
+		this.lable = "F"+this.id;
+		this.name = data.name;
 
-		this.raw = data;
+		if (!data.argument){
+			data.argument = [];
+		}
+		if (!data.variable){
+			data.variable = [];
+		}
+
+
+		// Generate class for local space
+		let local = [];
+		for (let attr of data.argument){
+			local.push({
+				name    : attr.name,
+				type    : attr.type,
+				line    : attr.line,
+				public  : true,
+				default : attr.default
+			});
+		}
+		for (let attr of data.variable){
+			local.push({
+				name    : attr.name,
+				type    : attr.type,
+				line    : attr.line,
+				public  : true,
+				default : attr.default
+			});
+		}
+		this.local = new Class(this.owner, {
+			name: this.name+"_LocalNameSpace",
+			attribute: local
+		});
+		this.owner.class.push(this.local);
 	}
 
 	link(){}
 	compile(){
+		let lines = [];
+		lines.push(`${this.local.lable}* local = reinterpret_cast<${this.local.lable}*>(task.labour->GetLocal());`);
+
 		this.owner.owner.functions.push({
 			name: this.lable,
-			lines: this.lines || ["//foo", "//bar", "return;"]
+			lines: lines
 		});
 	}
 }

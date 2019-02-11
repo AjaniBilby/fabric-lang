@@ -14,7 +14,12 @@ class Project{
 		this.functionCount = 0;
 		this.classCount = 0;
 
-		this.load(path.join(__dirname, './../../local/std/primative.json'))
+		// Load in the critical components of the standard library
+		this.load(
+			path.join(__dirname, './../../local/std/primative.json'),
+			'compiler',
+			false
+		);
 		this.load(root, 'compiler', true);
 	}
 }

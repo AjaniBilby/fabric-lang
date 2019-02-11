@@ -105,6 +105,10 @@ class File{
 	 * @param {Object} ignore
 	 */
 	get(name, ignore=null, history = []){
+		if (name === null){
+			return null;
+		}
+
 		// Prevent infinite loops
 		if (history.indexOf(this) != -1){
 			return null;
@@ -142,6 +146,7 @@ class File{
 					return this.owner.files[item.id];
 				}
 				if (item.as == "*"){
+					console.log(149, item.id, this.owner);
 					return this.owner.files[item.id].get(name, ignore, history);
 				}
 			}

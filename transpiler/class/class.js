@@ -20,7 +20,7 @@ class Class{
 		this.attribute   = data.attribute ? data.attribute : [];
 		this.isPrimivite = typeof(data.primitive) === "string";
 		this.primitive   = this.isPrimivite ? data.primitive : null;
-		this.lable       = this.isPrimivite ? this.primitive : `Class_${this.id}`;
+		this.lable       = this.isPrimivite ? this.primitive : `C${this.id}`;
 	}
 
 	link(){
@@ -28,7 +28,7 @@ class Class{
 			return;
 		}
 
-		// Check this element does not collide with any other names
+		// Check for name collision
 		let res = this.owner.get(this.name, this);
 		if (res !== null){
 			console.error(`Error: Invalid class definition. Class's name collides with another namespace definition.`);
