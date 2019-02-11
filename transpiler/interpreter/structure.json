@@ -83,9 +83,16 @@
 			"match": ["exact import", "white", "bracket \"\"", "white", "exact as", "*", "?white", "exact ;"],
 			"subpattern": [null, null, null, null, null, null, null]
 		},
-		"import.local": {
-			"match": ["exact import", "white", "bracket \"\"", "?white", "exact ;"],
-			"subpattern": [null, null, null, null, null]
+		"export": {
+			"match": ["exact export", "white", "*", "exact ;"]
 		}
-	}
+	},
+
+
+	"root": [
+		"class",
+		"function",
+		"import",
+		"export"
+	]
 }
