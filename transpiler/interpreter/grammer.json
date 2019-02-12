@@ -1,0 +1,110 @@
+{
+	"string": [
+		{
+			"name": "unicode",
+			"match": "\""
+		}, {
+			"name": "ascii",
+			"match": "'"
+		}
+	],
+	"comment": [
+		["//", "\n"],
+		["/*", "*/"]
+	],
+	"token": {
+		"add"      : "+",
+		"subtract" : "-",
+		"divide"   : "/",
+		"multiply" : "*",
+		"modulo"   : "%",
+
+		"and"        : "&",
+		"or"         : "|",
+		"not"        : "!",
+		"greatEqual" : "<=",
+		"lessEqual"  : ">=",
+		"aproxEqual" : "~=",
+		"equalTo"    : "==",
+
+		"assign": "=",
+		"semicolon": ";",
+
+		"pipe": "=>"
+	},
+	"bracket": {
+		"curley" : ["{", "}"],
+		"round"  : ["(", ")"],
+		"square" : ["[", "]"]
+	},
+	"keyword": [
+		"return",
+		"await",
+		"class",
+		"public",
+		"private",
+		"for",
+		"while"
+	],
+
+
+	"pattern": {
+		"expression": {
+			"match" : ["*"]
+		},
+		"code": {
+			"match": ["*"],
+			"sub": [
+				"definition",
+				"definition.assign",
+				"return"
+			]
+		},
+
+
+
+		"definition": {
+			"match" : ["namespace", "namespace"],
+			"sub"   : [ null,        null]
+		},
+		"definition.assign": {
+			"match" : ["namespace", "namespace", "equal", "*",         "semicolon"],
+			"sub"   : [ null,        null,        null,   "expression", null]
+		},
+		"assign": {
+			"match" : ["namespace", "equal", "*",         "semicolon"],
+			"sub"   : [ null,        null,   "expression", null]
+		},
+
+
+
+		"function": {
+			"match": ["namespace", "namespace", "bracket.round", "bracket.curley"],
+			"sub": [
+				null, null, ["deinition.assign", "definition", "code"]
+			]
+		},
+
+
+
+		"modifier.public": {
+			"match": ["keyword.public", "semicolon"]
+		},
+		"modifier.private": {
+			"match": ["keyword.private", "semicolon"]
+		},
+		"class": {
+			"match": ["keyword.class", "namespace", "bracket.curley"],
+			"sub": [
+				null, null,
+				["definition", "definition.assign", "function", "modifier.public", "modifier.private"]
+			]
+		},
+
+
+
+		"return": {
+			"match": ["keyword.return", "*", "semicolon"]
+		}
+	}
+}
