@@ -3,7 +3,10 @@ const fs = require('fs');
 
 
 let grammer = JSON.parse( fs.readFileSync(path.join(__dirname, './grammer.json'), 'utf8') );
-
+for (let key in grammer.bracket){
+	grammer.token[`bracket.${key}.open`]  = grammer.bracket[key][0];
+	grammer.token[`bracket.${key}.close`] = grammer.bracket[key][1];
+}
 
 
 function Tokenize(text){
