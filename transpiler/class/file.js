@@ -19,6 +19,7 @@ class File{
 		this.owner  = owner;
 		this.path   = filename;
 		this.isRoot = isRoot;
+		this.error  = false;
 
 		this.shortPath = filename;
 
@@ -40,8 +41,8 @@ class File{
 			console.error(`  filename : ${path.extname(filename)}`)
 			process.exit(1);
 		}
-		if (!data.exports){
-			data.exports = [];
+		if (!data.expose){
+			data.expose = [];
 		}
 		if (!data.class){
 			data.class = [];
@@ -56,29 +57,36 @@ class File{
 
 		for (let item of data.directive){
 			this.directive.push(new Directive(this, item));
-			if (item.name in data.exports){
-				this.directive[this.directive.length-1].exposed = true;
-			}
 		}
 
 		for (let item of data.class){
 			this.class.push(new Class(this, item));
-			if (item.name in data.exports){
-				this.class[this.class.length-1].exposed = true;
-
-				let name = this.class[this.class.length-1].name + "::";
-				for (let item2 of this.directive){
-					if (item2.name.substr(0, name.length) = name){
-						item2.exposed = true;
-					}
-				}
-			}
 		}
 
 		for (let item of data.import){
 			let loc = path.join(path.dirname(this.path), item.from);
 			let id = this.owner.load(loc, this.path);
 			this.library.push({id: id, as: item.as, line: item.line || NaN});
+		}
+		for (let item of data.expose){
+			if (item.name.indexOf('.') !== -1){
+				console.error(`Invalid exposure of '${item.name}'. You may only expose a class or function from this file`);
+				console.error(`  Note: You cannot expose a class' function, instead only the class its self`);
+				console.error(`  line: ${item.line}`);
+				this.error = true;
+				continue;
+			}
+
+			let ref = this.getLocal(item.name);
+			if (ref == null){
+				console.error(`Invalid exposure of '${item.name}'. No such class or function exists`);
+				console.error(`  Note: You cannot expose a class' function, instead only the class its self`);
+				console.error(`  line: ${item.line}`);
+				this.error = true;
+				continue;
+			}
+
+			ref.expose();
 		}
 	}
 
@@ -106,10 +114,12 @@ class File{
 
 	/**
 	 * Get the an object reference by locally defined namespace
-	 * @param {String|String[]} name
-	 * @param {Object} ignore
+	 * @param {String|String[]} name - what is the name of the class/func attempting to be found?
+	 * @param {Object} ignore - allows for searching for another object with a name conflict
+	 * @param {Array} history - prevents infinite loops by checking if it has already searched here
+	 * @param {Bool} local - this is a local name search or is it from another library and requires exposure?
 	 */
-	get(name, ignore=null, history = []){
+	get(name, ignore=null, history = [], local=true){
 		if (name === null){
 			return null;
 		}
@@ -132,6 +142,11 @@ class File{
 				if (item == ignore){
 					continue;
 				}
+				// This item is hidden form the searcher
+				if (item.exposed == false && local == true){
+					continue;
+				}
+
 				if (item.name == name){
 					return item;
 				}
@@ -141,6 +156,11 @@ class File{
 				if (item == ignore){
 					continue;
 				}
+				// This item is hidden form the searcher
+				if (item.exposed == false && local == true){
+					continue;
+				}
+
 				if (item.name == name){
 					return item;
 				}
@@ -157,8 +177,23 @@ class File{
 		}else{
 			for (let item of this.library){
 				if (item.as == name[0]){
-					return this.owner.files[item.id].get(name.slice(1), ignore, history);
+					return this.owner.files[item.id].get(name.slice(1), ignore, history, false);
 				}
+			}
+		}
+
+		return null;
+	}
+
+	getLocal(name){
+		for (let item of this.directive){
+			if (item.name == name){
+				return item;
+			}
+		}
+		for (let item of this.class){
+			if (item.name == name){
+				return item;
 			}
 		}
 

@@ -38,7 +38,7 @@
 		"square" : ["[", "]"]
 	},
 	"keyword": [
-		"import", "export", "as",
+		"import", "expose", "as",
 		"return",
 
 		"class", "public", "private",
@@ -72,8 +72,8 @@
 			"match" : ["keyword.import", "string.ascii", "token.semicolon"],
 			"sub"   : null
 		},{
-			"name"  : "export",
-			"match" : [ "keyword.export", "namespace", "token.semicolon" ],
+			"name"  : "expose",
+			"match" : [ "keyword.expose", "namespace", "token.semicolon" ],
 			"sub"   : null
 		},
 
@@ -152,9 +152,7 @@
 
 		{
 			"name": "return",
-			"match": [
-				["keyword.return", "*", "token.semicolon"]
-			],
+			"match": [ "keyword.return", "*", "token.semicolon" ],
 			"sub": null
 		}
 	],
@@ -163,6 +161,6 @@
 		"class",
 		"function",
 		"import",
-		"export"
+		"expose"
 	]
 }

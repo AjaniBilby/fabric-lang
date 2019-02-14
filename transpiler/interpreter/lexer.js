@@ -2,46 +2,28 @@ const path = require('path');
 const fs = require('fs');
 
 
+
 let grammer = JSON.parse( fs.readFileSync(path.join(__dirname, './grammer.json'), 'utf8') );
 for (let key in grammer.bracket){
 	grammer.token[`bracket.${key}.open`]  = grammer.bracket[key][0];
 	grammer.token[`bracket.${key}.close`] = grammer.bracket[key][1];
 }
-let rootPatterns = [];
-for (let item of grammer.pattern){
-	let structure = '';
-	for (let link of item.match){
-		structure += link + " -> ";
-	}
-	item.matchAsString = structure;
 
-	if (grammer.root.indexOf(item.name) !== -1){
-		rootPatterns.push(item);
-	}
-
-	if (item.sub){
-		for (let i=0; i<item.sub.length; i++){
-			if (item.sub[i] !== null){
-				for (let j=0; j<item.sub[i].length; j++){
-					let link = item.sub[i][j];
-					item.sub[i][j] = [];
-
-					// Find the targets
-					for (let target of grammer.pattern){
-						if (target.name == link){
-							item.sub[i][j].push(target);
-						}
-					}
-				}
-			}
+function GetPatternsByNames(names){
+	let patterns = [];
+	for (let pattern of grammer.pattern){
+		if (names.indexOf(pattern.name) != -1){
+			patterns.push(pattern);
 		}
 	}
+
+	return patterns;
 }
 
 
 function Tokenize(text){
 	var out = [];
-	text = text.replace(/\n\r/g, "\n");
+	text = text.replace(/\n\r/g, "\n").replace(/\t/g, ' ');
 
 	var col   = 1;
 	var line  = 1;
@@ -246,7 +228,10 @@ function Tokenize(text){
 	return out;
 }
 
-function Patternize(tokens, patterns = rootPatterns){
+function Patternize(tokens, patterns){
+	// Get pattern references from names
+	patterns = GetPatternsByNames(patterns);
+
 	let out = [];
 
 	outer: for (let i=0; i<tokens.length; i++){
@@ -277,7 +262,7 @@ function Patternize(tokens, patterns = rootPatterns){
 						progress++;
 						continue lMatch;
 					}
-				}else if (patterns[j].match[k] == "namespace"){
+				}else if (patterns[j].match[k]              == "namespace"){
 					if ("namespace" == tokens[offset].type){
 						match[k] = [tokens[offset]];
 						offset++;
@@ -300,17 +285,16 @@ function Patternize(tokens, patterns = rootPatterns){
 					}
 				}else if (patterns[j].match[k].substr(0, 8) == "bracket."){
 					let phrase = tokens[offset].type.split('.');
-					phrase = phrase.splice(0, 2).join('.'); // Get bracket.{type}
+					phrase = phrase.splice(1, 2).join('.'); // Get bracket.{type}
 
-					if (patterns[j].match[k] == phrase+".open"){
+					if (patterns[j].match[k] == phrase){
 						let cache = [];
 						let depth = 1;
-						let op = phrase+'.open';
-						let ed = phrase+'.close';
+						let op = 'token.'+phrase+'.open';
+						let ed = 'token.'+phrase+'.close';
 
-						data.data = [];
 						offset++;
-						while (offset < patterns.length){
+						while (offset < tokens.length){
 							if (tokens[offset].type == op){
 								depth++;
 							}
@@ -327,7 +311,7 @@ function Patternize(tokens, patterns = rootPatterns){
 
 						// If a closing point was actually found
 						if (tokens[offset].type == ed){
-							match.push(cache);
+							match[k] = cache;
 							offset++;
 							progress++;
 							continue lMatch;
@@ -384,8 +368,8 @@ function Patternize(tokens, patterns = rootPatterns){
 				// No point checking for any better matches
 				if (best.percent == 1){
 					// Generate sub patterns
-					if (patterns[j].sub !== null){
-						for (let k=0; k<best.data.length; k++){
+					if (patterns[j].sub){
+						for (let k=0; k<patterns[j].sub.length; k++){
 							if (patterns[j].sub[k] !== null){
 								best.data[k] = Patternize(best.data[k], patterns[j].sub[k]);
 							}
@@ -405,11 +389,7 @@ function Patternize(tokens, patterns = rootPatterns){
 			i += best.tokens-1;
 			continue outer;
 		}else{
-			if (best.percent > 0.5){
-				console.error(`Error: Unexpected token ${tokens[i].type}(${tokens[i].data}). Where you trying to make "${best.type}?"`);
-			}else{
-				console.error(`Error: Unexpected token ${tokens[i].type}(${tokens[i].data}).`);
-			}
+			console.error(`Error: Unexpected token ${tokens[i].type}(${tokens[i].data}). Where you trying to make "${best.type}?"`);
 			console.error(`  line: ${tokens[i].line}`);
 			console.error(`  col : ${tokens[i].col}`);
 			for (let i=0; i<best.data.length; i++){
@@ -431,19 +411,43 @@ function Patternize(tokens, patterns = rootPatterns){
 
 function Process(text){
 	let out = {
-		exports: [],
+		expose: [],
 		import: [],
 		class: [],
 		directive: []
 	};
 
-	let tokens = Tokenize(text);
-	console.log('tokens', tokens);
+	let patterns = Patternize(Tokenize(text), grammer.root);
+	console.log(patterns);
+	for (let pattern of patterns){
+		if (pattern.type == "expose"){
+			out.expose.push({
+				name: pattern.data[1][0].data,
+				line: pattern.data[0][0].line
+			});
+			continue;
+		}
 
-	let patterns = Patternize(tokens, rootPatterns);
-	console.log('patterns', patterns);
+		if (pattern.type == "import"){
+			if (pattern.data.length == 3){
+				out.import.push({
+					from: pattern.data[1][0].data,
+					as: "*",
+					line: pattern.data[0][0].line
+				});
+			}else{
+				out.import.push({
+					from: pattern.data[1][0].data,
+					as  : pattern.data[3][0].data,
+					line: pattern.data[0][0].line
+				});
+			}
+		}
+	}
 
-	return {};
+	console.log(out);
+
+	return out;
 }
 
 

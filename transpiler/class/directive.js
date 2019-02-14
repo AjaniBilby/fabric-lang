@@ -51,6 +51,10 @@ class Directive{
 		this.owner.class.push(this.local);
 	}
 
+	expose(){
+		this.exposed = true;
+	}
+
 	link(){}
 	compile(){
 		let lines = [];

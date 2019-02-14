@@ -23,6 +23,10 @@ class Class{
 		this.lable       = this.isPrimivite ? this.primitive : `C_${this.id.toString(16)}`;
 	}
 
+	expose(){
+		this.exposed = true;
+	}
+
 	link(){
 		if (this.name == "wild"){
 			return;
