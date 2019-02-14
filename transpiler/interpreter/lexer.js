@@ -7,6 +7,12 @@ for (let key in grammer.bracket){
 	grammer.token[`bracket.${key}.open`]  = grammer.bracket[key][0];
 	grammer.token[`bracket.${key}.close`] = grammer.bracket[key][1];
 }
+let rootPatterns = [];
+for (let item of grammer.pattern){
+	if (grammer.root.indexOf(item.name) !== -1){
+		rootPatterns.push(item);
+	}
+}
 
 
 function Tokenize(text){
@@ -214,6 +220,125 @@ function Tokenize(text){
 	return out;
 }
 
+function Patternize(tokens, patterns = rootPatterns){
+	let out = [];
+
+	outer: for (let i=0; i<tokens.length; i++){
+		let best = {
+			type: null,
+			percent: 0,
+			data: [],
+			tokens: 0
+		};
+
+		lPat: for (let j=0; j<patterns.length; j++){
+			let offset = i;
+			let progress = 0;
+			let match = [];
+
+			lMatch: for (let k=0; k<patterns[j].match.length; k++){
+				// If there are not enough tokens to complete this pattern
+				if (offset >= tokens.length){
+					break lMatch;
+				}
+
+				if       (patterns[j].match[k].substr(0, 7) == "keyword"){
+					if (patterns[j].match[k] == tokens[offset].type){
+						match.push( [tokens[offset]] );
+						offset++;
+						progress++;
+						continue lMatch;
+					}
+				}else if (patterns[j].match[k].substr(0, 5) == "token"){
+					if (patterns[j].match[k] == tokens[offset].type){
+						match.push( [tokens[offset]] );
+						offset++;
+						progress++;
+						continue lMatch;
+					}
+				}else if (patterns[j].match[k].substr(0, 6) == "string"){
+					if (patterns[j].match[k] == tokens[offset].type){
+						match.push( [tokens[offset]] );
+						offset++;
+						progress++;
+						continue lMatch;
+					}
+				}else if (patterns[j].match[k].substr(0, 7) == "bracket"){
+					let phrase = tokens[offset].type.split('.');
+					phrase = phrase.splice(0, 2).join('.'); // Get bracket.{type}
+
+					if (patterns[j].match[k] == phrase+".open"){
+						let cache = [];
+						let depth = 1;
+						let op = phrase+'.open';
+						let ed = phrase+'.close';
+
+						data.data = [];
+						offset++;
+						while (offset < patterns.length){
+							if (tokens[offset].type == op){
+								depth++;
+							}
+							if (tokens[offset].type == ed){
+								depth--;
+							}
+
+							if (depth == 0){
+								break;
+							}
+							cache.push(tokens[offset]);
+							offset++;
+						}
+
+						// If a closing point was actually found
+						if (tokens[offset].type == ed){
+							match.push(cache);
+							offset++;
+							progress++;
+							continue lMatch;
+						}
+					}
+				}else if (patterns[j].match[k] == "*"){
+
+				}
+			}
+
+			// Is this match a better match than the existing option?
+			progress /= patterns[j].match.length;
+			if (progress > best.percent || best.type == null){
+				best.data    = match;
+				best.percent = progress;
+				best.type    = patterns[j].name;
+				best.tokens    = offset;
+
+				// The best pattern has been found,
+				// No point checking for any better matches
+				if (best.percent == 1){
+					break lPat;
+				}
+			}
+		}
+
+		if (best.percent = 1){
+			out.push({
+				type: best.type,
+				data: best.data
+			});
+			i += best.tokens-1;
+			continue outer;
+		}
+
+		out.push({
+			type : tokens[i].type,
+			col  : tokens[i].col,
+			line : tokens[i].line,
+			data : tokens[i].data
+		});
+	}
+
+	return out;
+}
+
 function Process(text){
 	let out = {
 		exports: [],
@@ -223,7 +348,9 @@ function Process(text){
 	};
 
 	let tokens = Tokenize(text);
-	console.log(tokens);
+
+	let patterns = Patternize(tokens, rootPatterns);
+	console.log('patterns', patterns);
 
 	return {};
 }

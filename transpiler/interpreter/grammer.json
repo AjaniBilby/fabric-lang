@@ -48,54 +48,80 @@
 	],
 
 
-	"pattern": {
-		"expression": {
-			"match" : ["*"]
+	"pattern": [
+		{
+			"name": "import",
+			"match": ["keyword.import", "string.unicode", "keyword.as", "namespace"],
+			"sub": [null, null, null, null]
+		},{
+			"name": "import",
+			"match": ["keyword.import", "string.unicode", "keyword.as", "token.multiply"],
+			"sub": [null, null, null, null]
+		},{
+			"name": "import",
+			"match": ["keyword.import", "string.ascii", "keyword.as", "namespace"],
+			"sub": [null, null, null, null]
+		},{
+			"name": "import",
+			"match": ["keyword.import", "string.ascii", "keyword.as", "token.multiply"],
+			"sub": [null, null, null, null]
+		},{
+			"name": "export",
+			"match": ["keyword.export", "namespace"]
 		},
-		"code": {
-			"match": ["*"],
-			"sub": [
+
+		{
+			"name": "expression",
+			"match" : ["*"],
+			"sub"   : null
+		},{
+			"name": "code",
+			"match" : ["*"],
+			"sub"   : [[
 				"definition",
 				"definition.assign",
 				"return"
-			]
+			]]
 		},
 
 
 
-		"definition": {
+		{
+			"name": "defininition",
 			"match" : ["namespace", "namespace"],
 			"sub"   : [ null,        null]
-		},
-		"definition.assign": {
+		},{
+			"name": "definition.assign",
 			"match" : ["namespace", "namespace", "token.equal", "*",         "token.semicolon"],
 			"sub"   : [ null,        null,        null,   "expression", null]
-		},
-		"assign": {
+		},{
+			"name": "assign",
 			"match" : ["namespace", "token.equal", "*",         "token.semicolon"],
 			"sub"   : [ null,        null,   "expression", null]
 		},
 
 
 
-		"function": {
-			"match": ["namespace", "namespace", "bracket.round", "bracket.curley"],
-			"sub": [
+		{
+			"name": "function",
+			"match" : ["namespace", "namespace", "bracket.round", "bracket.curley"],
+			"sub"   : [
 				null, null, ["deinition.assign", "definition", "code"]
 			]
 		},
 
 
 
-		"modifier.public": {
+		{
+			"name": "modifier.public",
 			"match": ["keyword.public", "token.semicolon"]
-		},
-		"modifier.private": {
+		},{
+			"name": "modifier.private",
 			"match": ["keyword.private", "token.semicolon"]
-		},
-		"class": {
-			"match": ["keyword.class", "namespace", "bracket.curley"],
-			"sub": [
+		},{
+			"name": "class",
+			"match" : ["keyword.class", "namespace", "bracket.curley"],
+			"sub"   : [
 				null, null,
 				["definition", "definition.assign", "function"]
 			]
@@ -103,8 +129,16 @@
 
 
 
-		"return": {
+		{
+			"name": "return",
 			"match": ["keyword.return", "*", "token.semicolon"]
 		}
-	}
+	],
+
+	"root": [
+		"class",
+		"function",
+		"import",
+		"export"
+	]
 }
