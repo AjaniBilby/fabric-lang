@@ -51,23 +51,24 @@
 	"pattern": [
 		{
 			"name": "import",
-			"match": ["keyword.import", "string.unicode", "keyword.as", "namespace"],
-			"sub": [null, null, null, null]
+			"match": ["keyword.import", "string.unicode", "keyword.as", "namespace", "token.semicolon"],
+			"sub": [null, null, null, null, null]
 		},{
 			"name": "import",
-			"match": ["keyword.import", "string.unicode", "keyword.as", "token.multiply"],
-			"sub": [null, null, null, null]
+			"match": ["keyword.import", "string.unicode", "keyword.as", "token.multiply", "token.semicolon"],
+			"sub": [null, null, null, null, null]
 		},{
 			"name": "import",
-			"match": ["keyword.import", "string.ascii", "keyword.as", "namespace"],
-			"sub": [null, null, null, null]
+			"match": ["keyword.import", "string.ascii", "keyword.as", "namespace", "token.semicolon"],
+			"sub": [null, null, null, null, null]
 		},{
 			"name": "import",
-			"match": ["keyword.import", "string.ascii", "keyword.as", "token.multiply"],
-			"sub": [null, null, null, null]
+			"match": ["keyword.import", "string.ascii", "keyword.as", "token.multiply", "token.semicolon"],
+			"sub": [ null, null, null, null, null ]
 		},{
 			"name": "export",
-			"match": ["keyword.export", "namespace"]
+			"match": [ "keyword.export", "namespace" ],
+			"sub": null
 		},
 
 		{
@@ -77,27 +78,36 @@
 		},{
 			"name": "code",
 			"match" : ["*"],
-			"sub"   : [[
-				"definition",
-				"definition.assign",
-				"return"
-			]]
+			"sub"   : [
+				["definition", "definition.assign", "return"]
+			]
 		},
 
 
 
 		{
-			"name": "defininition",
+			"name": "definition",
 			"match" : ["namespace", "namespace"],
 			"sub"   : [ null,        null]
 		},{
 			"name": "definition.assign",
 			"match" : ["namespace", "namespace", "token.equal", "*",         "token.semicolon"],
-			"sub"   : [ null,        null,        null,   "expression", null]
+			"sub"   : [
+				null,
+				null,
+				null,
+				["expression"],
+				null
+			]
 		},{
 			"name": "assign",
 			"match" : ["namespace", "token.equal", "*",         "token.semicolon"],
-			"sub"   : [ null,        null,   "expression", null]
+			"sub"   : [
+				null,
+				null,
+				["expression"],
+				null
+			]
 		},
 
 
@@ -106,7 +116,10 @@
 			"name": "function",
 			"match" : ["namespace", "namespace", "bracket.round", "bracket.curley"],
 			"sub"   : [
-				null, null, ["deinition.assign", "definition", "code"]
+				null,
+				null,
+				["definition", "definition.assign"],
+				["code"]
 			]
 		},
 
@@ -114,10 +127,12 @@
 
 		{
 			"name": "modifier.public",
-			"match": ["keyword.public", "token.semicolon"]
+			"match": ["keyword.public", "token.semicolon"],
+			"sub": null
 		},{
 			"name": "modifier.private",
-			"match": ["keyword.private", "token.semicolon"]
+			"match": ["keyword.private", "token.semicolon"],
+			"sub": null
 		},{
 			"name": "class",
 			"match" : ["keyword.class", "namespace", "bracket.curley"],
@@ -131,7 +146,9 @@
 
 		{
 			"name": "return",
-			"match": ["keyword.return", "*", "token.semicolon"]
+			"match": [
+				["keyword.return", "*", "token.semicolon"]
+			]
 		}
 	],
 

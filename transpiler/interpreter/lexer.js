@@ -9,15 +9,39 @@ for (let key in grammer.bracket){
 }
 let rootPatterns = [];
 for (let item of grammer.pattern){
+	let structure = '';
+	for (let link of item.match){
+		structure += link + " -> ";
+	}
+	item.matchAsString = structure;
+
 	if (grammer.root.indexOf(item.name) !== -1){
 		rootPatterns.push(item);
+	}
+
+	if (item.sub){
+		for (let i=0; i<item.sub.length; i++){
+			if (item.sub[i] !== null){
+				for (let j=0; j<item.sub[i].length; j++){
+					let link = item.sub[i][j];
+					item.sub[i][j] = [];
+
+					// Find the targets
+					for (let target of grammer.pattern){
+						if (target.name == link){
+							item.sub[i][j].push(target);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
 
 function Tokenize(text){
 	var out = [];
-	text = text.replace(/\n\n/g, "\n");
+	text = text.replace(/\n\r/g, "\n");
 
 	var col   = 1;
 	var line  = 1;
@@ -179,6 +203,7 @@ function Tokenize(text){
 					}
 
 					i++;
+					col++;
 				}
 				i   += item.match.length;
 				col += item.match.length;
@@ -204,8 +229,8 @@ function Tokenize(text){
 					line: line
 				});
 
-				i += key.length;
-				col += key.length;
+				i += grammer.token[key].length;
+				col += grammer.token[key].length;
 
 				lastI = i;
 				lastCol = col;
@@ -216,6 +241,7 @@ function Tokenize(text){
 		col++;
 		i++;
 	}
+	PushNamespace();
 
 	return out;
 }
@@ -309,23 +335,40 @@ function Patternize(tokens, patterns = rootPatterns){
 				best.data    = match;
 				best.percent = progress;
 				best.type    = patterns[j].name;
-				best.tokens    = offset;
+				best.tokens  = offset;
 
 				// The best pattern has been found,
 				// No point checking for any better matches
 				if (best.percent == 1){
+					// Generate sub patterns
+					if (patterns[j].sub !== null){
+						for (let k=0; k<best.data.length; k++){
+							if (patterns[j].sub[k] !== null){
+								best.data[k] = Patternize(best.data[k], patterns[j].sub[k]);
+							}
+						}
+					}
+
 					break lPat;
 				}
 			}
 		}
 
-		if (best.percent = 1){
+		if (best.percent == 1){
 			out.push({
 				type: best.type,
 				data: best.data
 			});
 			i += best.tokens-1;
 			continue outer;
+		}else{
+			if (best.percent > 0.5){
+				console.error(`Error: Unexpected token ${tokens[i].type}(${tokens[i].data}). Where you trying to make "${best.type}?"`);
+			}else{
+				console.error(`Error: Unexpected token ${tokens[i].type}(${tokens[i].data}).`);
+			}
+			console.error(`  line: ${tokens[i].line}`);
+			console.error(`  col : ${tokens[i].col}`);
 		}
 
 		out.push({
@@ -347,7 +390,10 @@ function Process(text){
 		directive: []
 	};
 
+	console.log('text ```'+text+'```');
+
 	let tokens = Tokenize(text);
+	console.log('tokens', tokens);
 
 	let patterns = Patternize(tokens, rootPatterns);
 	console.log('patterns', patterns);
