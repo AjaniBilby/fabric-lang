@@ -38,37 +38,43 @@
 		"square" : ["[", "]"]
 	},
 	"keyword": [
+		"import", "export", "as",
 		"return",
+
+		"class", "public", "private",
+
 		"await",
-		"class",
-		"public",
-		"private",
-		"for",
-		"while"
+
+		"for", "while",
+		"continue", "break",
+
+		"if",
+		"else",
+		"elseif"
 	],
 
 
 	"pattern": [
 		{
-			"name": "import",
-			"match": ["keyword.import", "string.unicode", "keyword.as", "namespace", "token.semicolon"],
-			"sub": [null, null, null, null, null]
+			"name"  : "import",
+			"match" : ["keyword.import", "string.unicode", "keyword.as", "namespace", "token.semicolon"],
+			"sub"   : null
 		},{
-			"name": "import",
-			"match": ["keyword.import", "string.unicode", "keyword.as", "token.multiply", "token.semicolon"],
-			"sub": [null, null, null, null, null]
+			"name"  : "import",
+			"match" : ["keyword.import", "string.unicode", "token.semicolon"],
+			"sub"   : null
 		},{
-			"name": "import",
-			"match": ["keyword.import", "string.ascii", "keyword.as", "namespace", "token.semicolon"],
-			"sub": [null, null, null, null, null]
+			"name"  : "import",
+			"match" : ["keyword.import", "string.ascii", "keyword.as", "namespace", "token.semicolon"],
+			"sub"   : null
 		},{
-			"name": "import",
-			"match": ["keyword.import", "string.ascii", "keyword.as", "token.multiply", "token.semicolon"],
-			"sub": [ null, null, null, null, null ]
+			"name"  : "import",
+			"match" : ["keyword.import", "string.ascii", "token.semicolon"],
+			"sub"   : null
 		},{
-			"name": "export",
-			"match": [ "keyword.export", "namespace" ],
-			"sub": null
+			"name"  : "export",
+			"match" : [ "keyword.export", "namespace", "token.semicolon" ],
+			"sub"   : null
 		},
 
 		{
@@ -91,7 +97,7 @@
 			"sub"   : [ null,        null]
 		},{
 			"name": "definition.assign",
-			"match" : ["namespace", "namespace", "token.equal", "*",         "token.semicolon"],
+			"match" : ["namespace", "namespace", "token.assign", "*", "token.semicolon"],
 			"sub"   : [
 				null,
 				null,
@@ -101,7 +107,7 @@
 			]
 		},{
 			"name": "assign",
-			"match" : ["namespace", "token.equal", "*",         "token.semicolon"],
+			"match" : ["namespace", "token.assign", "*",         "token.semicolon"],
 			"sub"   : [
 				null,
 				null,
@@ -148,7 +154,8 @@
 			"name": "return",
 			"match": [
 				["keyword.return", "*", "token.semicolon"]
-			]
+			],
+			"sub": null
 		}
 	],
 

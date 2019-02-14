@@ -61,7 +61,7 @@ function Tokenize(text){
 
 		function PushChunk(){
 			if (stack.length > 0){
-				let isKeyword = grammer.keyword.indexOf(stack);
+				let isKeyword = grammer.keyword.indexOf(stack) != -1;
 
 				out.push({
 					type: isKeyword ? `keyword.${stack}` : "namespace",
@@ -260,7 +260,9 @@ function Patternize(tokens, patterns = rootPatterns){
 		lPat: for (let j=0; j<patterns.length; j++){
 			let offset = i;
 			let progress = 0;
-			let match = [];
+			let match = new Array(patterns[j].match.length);
+			let terms = patterns[j].match;
+			match.fill(null, 0);
 
 			lMatch: for (let k=0; k<patterns[j].match.length; k++){
 				// If there are not enough tokens to complete this pattern
@@ -268,28 +270,35 @@ function Patternize(tokens, patterns = rootPatterns){
 					break lMatch;
 				}
 
-				if       (patterns[j].match[k].substr(0, 7) == "keyword"){
+				if       (patterns[j].match[k].substr(0, 8) == "keyword."){
 					if (patterns[j].match[k] == tokens[offset].type){
-						match.push( [tokens[offset]] );
+						match[k] = [tokens[offset]];
 						offset++;
 						progress++;
 						continue lMatch;
 					}
-				}else if (patterns[j].match[k].substr(0, 5) == "token"){
-					if (patterns[j].match[k] == tokens[offset].type){
-						match.push( [tokens[offset]] );
+				}else if (patterns[j].match[k] == "namespace"){
+					if ("namespace" == tokens[offset].type){
+						match[k] = [tokens[offset]];
 						offset++;
 						progress++;
 						continue lMatch;
 					}
-				}else if (patterns[j].match[k].substr(0, 6) == "string"){
+				}else if (patterns[j].match[k].substr(0, 6) == "token."){
 					if (patterns[j].match[k] == tokens[offset].type){
-						match.push( [tokens[offset]] );
+						match[k] = [tokens[offset]] ;
 						offset++;
 						progress++;
 						continue lMatch;
 					}
-				}else if (patterns[j].match[k].substr(0, 7) == "bracket"){
+				}else if (patterns[j].match[k].substr(0, 7) == "string."){
+					if (patterns[j].match[k] == tokens[offset].type){
+						match[k] = [tokens[offset]];
+						offset++;
+						progress++;
+						continue lMatch;
+					}
+				}else if (patterns[j].match[k].substr(0, 8) == "bracket."){
 					let phrase = tokens[offset].type.split('.');
 					phrase = phrase.splice(0, 2).join('.'); // Get bracket.{type}
 
@@ -325,8 +334,41 @@ function Patternize(tokens, patterns = rootPatterns){
 						}
 					}
 				}else if (patterns[j].match[k] == "*"){
+					// If the wild char is the last matching term
+					if (k+1 >= patterns[j].match.length){
+						match[k] = tokens.slice(offset);
+						offset = tokens.length;
+						progress++;
+						continue lMatch;
+					}
 
+					// What is the end point for this wild consumption?
+					let end = patterns[j].match[k+1];
+					if (end == "*"){
+						console.error(`Error: Internal programming error, a wildchar exists after a wildchar in grammer`);
+						process.exit(1);
+					}
+
+					if (end.substr(0, 7) == "bracket"){
+						end += ".open";
+					}
+
+					// Otherwise consume until the next token is reached
+					let cache = [];
+					while (offset < tokens.length){
+						if (tokens[offset].type == end){
+							break;
+						}
+
+						offset++;
+					}
+
+					match[k] = cache;
+					progress++;
+					continue lMatch;
 				}
+
+				match[k] = null;
 			}
 
 			// Is this match a better match than the existing option?
@@ -335,7 +377,8 @@ function Patternize(tokens, patterns = rootPatterns){
 				best.data    = match;
 				best.percent = progress;
 				best.type    = patterns[j].name;
-				best.tokens  = offset;
+				best.tokens  = offset-i;
+				best.terms   = terms;
 
 				// The best pattern has been found,
 				// No point checking for any better matches
@@ -369,6 +412,10 @@ function Patternize(tokens, patterns = rootPatterns){
 			}
 			console.error(`  line: ${tokens[i].line}`);
 			console.error(`  col : ${tokens[i].col}`);
+			for (let i=0; i<best.data.length; i++){
+				console.error(`    ${best.data[i] != null ? "Y": "N"} ${best.terms[i]}`);
+			}
+			process.exit(1);
 		}
 
 		out.push({
@@ -389,8 +436,6 @@ function Process(text){
 		class: [],
 		directive: []
 	};
-
-	console.log('text ```'+text+'```');
 
 	let tokens = Tokenize(text);
 	console.log('tokens', tokens);
