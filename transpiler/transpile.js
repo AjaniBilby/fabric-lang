@@ -11,19 +11,27 @@ if (process.argv[2] == "-v"){
 	process.exit(0);
 }
 
+console.info('Loading;');
 let proj = new Project(path.normalize(__dirname + "/../" + process.argv[2]));
+if (proj.HasError()){
+	console.error("\nCritical load error");
+	process.exit(1);
+}
+
+console.info('\nLinking;');
 proj.link();
 if (proj.HasError()){
-	console.error("Linker Error");
-	process.exit();
+	console.error("\nCritical linker error");
+	process.exit(1);
 }
+console.info('\nCompiling;');
 proj.compile();
 if (proj.HasError()){
-	console.error("Compilation Error");
-	process.exit();
+	console.error("\nCritical compilation error");
+	process.exit(1);
 }
 
 console.info('');
-let outputPath = path.join(__dirname, './../', process.argv[3] || "a.cpp");
+let outputPath = path.join(__dirname, './../', process.argv[3] || "dump-fabric.cpp");
 proj.save(outputPath);
 console.info('Saved:', outputPath);

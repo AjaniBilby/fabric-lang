@@ -34,7 +34,7 @@ class File{
 		if (extension == ".json"){
 			data = JSON.parse( fs.readFileSync(filename, 'utf8') );
 		}else if (extension == ".fab"){
-			data = Interpret( fs.readFileSync(filename, 'utf8') );
+			data = Interpret( fs.readFileSync(filename, 'utf8'), filename );
 		}else{
 			console.error(`Invalid file type ${path.extname(filename)}`);
 			console.error(`  importer : ${importer}`);
@@ -76,6 +76,13 @@ class File{
 				this.error = true;
 				continue;
 			}
+			if (item.name.indexOf('::') !== -1){
+				console.error(`Invalid exposure of '${item.name}'. You cannot expose just a class' function, you must expose the whole class`);
+				console.error(`  Note: You cannot expose a class' function, instead only the class its self`);
+				console.error(`  line: ${item.line}`);
+				this.error = true;
+				continue;
+			}
 
 			let ref = this.getLocal(item.name);
 			if (ref == null){
@@ -91,14 +98,26 @@ class File{
 	}
 
 	link(){
-		this.shortPath = path.relative(this.owner.rootPath, this.path);
+		if  (this.owner.rootPath == this.path){
+			this.shortPath = path.basename(this.path);
+		}else{
+			this.shortPath = path.relative(this.owner.rootPath, this.path);
+		}
 
 		for (let item of this.directive){
 			item.link();
 		}
+		if (this.error){
+			return;
+		}
+
 		for (let item of this.class){
 			item.link();
 		}
+		if (this.error){
+			return;
+		}
+
 		for (let item of this.class){
 			item.CircularCheck();
 		}
@@ -143,7 +162,7 @@ class File{
 					continue;
 				}
 				// This item is hidden form the searcher
-				if (item.exposed == false && local == true){
+				if (item.exposed == false && local == false){
 					continue;
 				}
 
@@ -157,7 +176,7 @@ class File{
 					continue;
 				}
 				// This item is hidden form the searcher
-				if (item.exposed == false && local == true){
+				if (item.exposed == false && local == false){
 					continue;
 				}
 

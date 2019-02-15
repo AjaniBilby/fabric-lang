@@ -27,10 +27,10 @@
 		"aproxEqual" : "~=",
 		"equalTo"    : "==",
 
-		"assign": "=",
-		"semicolon": ";",
-
-		"pipe": "=>"
+		"assign"    : "=",
+		"colon"     : ":",
+		"semicolon" : ";",
+		"pipe"      : "=>"
 	},
 	"bracket": {
 		"curley" : ["{", "}"],
@@ -41,7 +41,7 @@
 		"import", "expose", "as",
 		"return",
 
-		"class", "public", "private",
+		"class", "public", "private", "extends",
 
 		"await",
 
@@ -85,17 +85,13 @@
 			"name": "code",
 			"match" : ["*"],
 			"sub"   : [
-				["definition", "definition.assign", "return"]
+				["definition", "definition.assign", "assign", "return"]
 			]
 		},
 
 
 
 		{
-			"name": "definition",
-			"match" : ["namespace", "namespace"],
-			"sub"   : [ null,        null]
-		},{
 			"name": "definition.assign",
 			"match" : ["namespace", "namespace", "token.assign", "*", "token.semicolon"],
 			"sub"   : [
@@ -105,6 +101,10 @@
 				["expression"],
 				null
 			]
+		},{
+			"name": "definition",
+			"match" : ["namespace", "namespace", "token.semicolon"],
+			"sub"   : [ null,        null]
 		},{
 			"name": "assign",
 			"match" : ["namespace", "token.assign", "*",         "token.semicolon"],
@@ -124,7 +124,7 @@
 			"sub"   : [
 				null,
 				null,
-				["definition", "definition.assign"],
+				["definition.assign", "definition"],
 				["code"]
 			]
 		},
@@ -133,18 +133,28 @@
 
 		{
 			"name": "modifier.public",
-			"match": ["keyword.public", "token.semicolon"],
+			"match": ["keyword.public", "token.colon"],
 			"sub": null
 		},{
 			"name": "modifier.private",
-			"match": ["keyword.private", "token.semicolon"],
+			"match": ["keyword.private", "token.colon"],
 			"sub": null
 		},{
 			"name": "class",
 			"match" : ["keyword.class", "namespace", "bracket.curley"],
 			"sub"   : [
 				null, null,
-				["definition", "definition.assign", "function"]
+				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
+			]
+		},{
+			"name"  : "class",
+			"match" : ["keyword.class", "namespace", "keyword.extends", "namespace", "bracket.curley"],
+			"sub"   : [
+				null,
+				null,
+				null,
+				null,
+				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
 			]
 		},
 

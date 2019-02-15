@@ -21,6 +21,10 @@ class Class{
 		this.isPrimivite = typeof(data.primitive) === "string";
 		this.primitive   = this.isPrimivite ? data.primitive : null;
 		this.lable       = this.isPrimivite ? this.primitive : `C_${this.id.toString(16)}`;
+
+		if (this.name == "Wild"){
+			this.extends = null;
+		}
 	}
 
 	expose(){
@@ -44,24 +48,41 @@ class Class{
 		}
 
 		// Check inheretance class exists
-		res = this.owner.get(this.extends);
-		if (res == null){
-			console.error(`Error: Invalid class definition. Unable to find extension class '${this.extends}'.`);
-			console.error(`  file  : ${this.owner.shortPath}`);
-			console.error(`  class : ${this.name}`);
-			console.error(`  line  : ${this.line}`);
-			this.owner.error = true;
-			return;
+		if (this.extends !== null){
+			res = this.owner.get(this.extends, this);
+			if (res == null){
+				console.error(`Error: Invalid class definition. Unable to find extension class '${this.extends}'.`);
+				console.error(`  file  : ${this.owner.shortPath}`);
+				console.error(`  class : ${this.name}`);
+				console.error(`  line  : ${this.line}`);
+				this.owner.error = true;
+				return;
+			}
+			if ((res instanceof Class) == false){
+				console.error(`Error: Invalid class definition. A class can only extend of another class, not '${this.extends}'.`);
+				console.error(`  file  : ${this.owner.shortPath}`);
+				console.error(`  class : ${this.name}`);
+				console.error(`  line  : ${this.line}`);
+				this.owner.error = true;
+			}
+			this.extends = res;
+			this.extends.decendant.push(this);
 		}
-		if ((res instanceof Class) == false){
-			console.error(`Error: Invalid class definition. A class can only extend of another class, not '${this.extends}'.`);
-			console.error(`  file  : ${this.owner.shortPath}`);
-			console.error(`  class : ${this.name}`);
-			console.error(`  line  : ${this.line}`);
-			this.owner.error = true;
+
+		// Receive the attributes required to be a decendant of 'extends'
+		if (this.extends !== null && this.isPrimitive == false){
+			if (this.extends.isPrimivite){
+				this.attribute = [{
+					name: 'data',
+					type: this.extends.name,
+					line: 0,
+					col: 0,
+					public: false
+				}].concat(this.attribute);
+			}else{
+				this.attribute = this.extends.attribute.concat(this.attribute)
+			}
 		}
-		this.extends = res;
-		this.extends.decendant.push(this);
 
 		// Check all attribute types exist and names do not collide
 		let reserve = [];

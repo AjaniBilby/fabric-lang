@@ -17,6 +17,17 @@ function GetPatternsByNames(names){
 		}
 	}
 
+	// Make sure longer patterns are tested first
+	patterns = patterns.sort((a, b)=>{
+		if (a.match.length < b.match.length){
+			return 1;
+		}else if (a.match.length > b.match.length){
+			return -1;
+		}else{
+			return 0;
+		}
+	});
+
 	return patterns;
 }
 
@@ -228,7 +239,7 @@ function Tokenize(text){
 	return out;
 }
 
-function Patternize(tokens, patterns){
+function Patternize(tokens, patterns, filename = "Unknown"){
 	// Get pattern references from names
 	patterns = GetPatternsByNames(patterns);
 
@@ -344,6 +355,7 @@ function Patternize(tokens, patterns){
 							break;
 						}
 
+						cache.push(tokens[offset]);
 						offset++;
 					}
 
@@ -357,7 +369,7 @@ function Patternize(tokens, patterns){
 
 			// Is this match a better match than the existing option?
 			progress /= patterns[j].match.length;
-			if (progress > best.percent || best.type == null){
+			if (best.type == null || progress > best.percent){
 				best.data    = match;
 				best.percent = progress;
 				best.type    = patterns[j].name;
@@ -371,7 +383,7 @@ function Patternize(tokens, patterns){
 					if (patterns[j].sub){
 						for (let k=0; k<patterns[j].sub.length; k++){
 							if (patterns[j].sub[k] !== null){
-								best.data[k] = Patternize(best.data[k], patterns[j].sub[k]);
+								best.data[k] = Patternize(best.data[k], patterns[j].sub[k], filename);
 							}
 						}
 					}
@@ -390,10 +402,12 @@ function Patternize(tokens, patterns){
 			continue outer;
 		}else{
 			console.error(`Error: Unexpected token ${tokens[i].type}(${tokens[i].data}). Where you trying to make "${best.type}?"`);
+			console.error(`  file: ${filename}`);
 			console.error(`  line: ${tokens[i].line}`);
 			console.error(`  col : ${tokens[i].col}`);
+			console.error(`  pattern;`);
 			for (let i=0; i<best.data.length; i++){
-				console.error(`    ${best.data[i] != null ? "Y": "N"} ${best.terms[i]}`);
+				console.error(`   ${best.data[i] != null ? "    ": "miss"}  ${best.terms[i]}`);
 			}
 			process.exit(1);
 		}
@@ -409,26 +423,140 @@ function Patternize(tokens, patterns){
 	return out;
 }
 
-function Process(text){
+
+
+function Process(text, filename){
 	let out = {
-		expose: [],
-		import: [],
-		class: [],
+		expose   : [],
+		import   : [],
+		class    : [],
 		directive: []
 	};
 
-	let patterns = Patternize(Tokenize(text), grammer.root);
-	console.log(patterns);
+	function ConsumeFunction(pattern){
+		let func = {
+			name: pattern.data[1][0].data,
+			line: pattern.data[0][0].line,
+			return: pattern.data[0][0].data,
+			argument: [],
+			local: [],
+			code: pattern.data[3]
+		};
+
+		for (let item of pattern.data[2]){
+			let arg = {
+				name: item.data[1][0].data,
+				type: null,
+
+				upgradeable: false,
+				pointer    : false,
+				public     : true,
+				default    : null,
+
+				line: item.data[0][0].line,
+				col : item.data[0][0].col
+			};
+
+			// Get type and modifiers
+			if (item.data[0][0].data[0] == "^"){
+				item.data[0][0].data[0] = item.data[0][0].data[0].slice(1);
+				arg.upgradeable = true;
+			}
+			if (item.data[0][0].data[0] == "@"){
+				item.data[0][0].data[0] = item.data[0][0].data[0].slice(1);
+				arg.pointer = true;
+			}
+			arg.type = item.data[0][0].data[0];
+
+			// Get default value if it has one
+			if (item.type == "definition.assign"){
+				arg.default = item.data[3][0];
+			}
+
+			func.argument.push(arg);
+		}
+
+		return func;
+	}
+
+	function ConsumeClass(pattern){
+		let inherit = null;
+		let inner;
+		if (pattern.data.length == 5){
+			inherit = pattern.data[3][0].data;
+			inner = pattern.data[4];
+		}else{
+			inner = pattern.data[2];
+		}
+
+		let struct = {
+			name    : pattern.data[1][0].data,
+			extends : inherit,
+
+			attribute: [],
+
+			line: pattern.data[0][0].line,
+
+			prototype: []
+		};
+
+		let isPublic = true;
+		for (let item of inner){
+			if (item.type == "modifier.public"){
+				isPublic = true;
+				continue;
+			}else if (item.type == "modifier.private"){
+				isPublic = false;
+				continue;
+			}
+
+			if (item.type == "definition.assign" || item.type == "definition"){
+				let attr = {
+					name: item.data[1][0].data,
+					type: null,
+
+					upgradeable: false,
+					pointer    : false,
+					public     : isPublic,
+					default    : null,
+
+					line: item.data[0][0].line,
+					col : item.data[0][0].col
+				};
+
+				// Get type and modifiers
+				if (item.data[0][0].data[0] == "@"){
+					item.data[0][0].data = item.data[0][0].data[0].slice(1);
+					attr.pointer = true;
+				}
+				attr.type = item.data[0][0].data;
+
+				// Get default value if it has one
+				if (item.type == "definition.assign"){
+					attr.default = item.data[3][0];
+				}
+
+				struct.attribute.push(attr);
+				continue;
+			}
+
+			if (item.type == "function"){
+				struct.prototype.push( ConsumeFunction(item) );
+			}
+		}
+
+		return struct;
+	}
+
+	let patterns = Patternize(Tokenize(text), grammer.root, filename);
 	for (let pattern of patterns){
-		if (pattern.type == "expose"){
+		if       (pattern.type == "expose"){
 			out.expose.push({
 				name: pattern.data[1][0].data,
 				line: pattern.data[0][0].line
 			});
 			continue;
-		}
-
-		if (pattern.type == "import"){
+		}else if (pattern.type == "import"){
 			if (pattern.data.length == 3){
 				out.import.push({
 					from: pattern.data[1][0].data,
@@ -442,11 +570,17 @@ function Process(text){
 					line: pattern.data[0][0].line
 				});
 			}
+
+			continue;
+		}else if (pattern.type == "class"){
+			out.class.push( ConsumeClass(pattern) );
+		}else if (pattern.type == "function"){
+			out.class.push( ConsumeFunction(pattern) );
 		}
 	}
 
-	console.log(out);
-
+	console.log('out', out);
+	console.log('class', out.class[0].attribute);
 	return out;
 }
 

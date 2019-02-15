@@ -93,10 +93,16 @@ Project.prototype.save = function(outputName){
 
 	for (let file of this.files){
 		if (file.isRoot){
-			let res = file.get('main');
-			if ((res instanceof Directive) == false){
+			let res = file.get('main', null, [], true);
+			if (res === null){
 				console.error(`Error: Root file does not include any definition of a 'main' function.`);
 				console.error(`  Please create, or import a 'main' function into module namespace`);
+				stream.close();
+				process.exit(1);
+				return;
+			}
+			if ((res instanceof Directive) == false){
+				console.error(`Error: namespace 'main' is not a function`);
 				stream.close();
 				process.exit(1);
 				return;

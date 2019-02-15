@@ -15,6 +15,7 @@ class Directive{
 		this.id = owner.owner.GetUniqueFunctionID();
 		this.lable = "F_"+this.id.toString(16);
 		this.name = data.name;
+		this.return = data.return;
 
 		if (!data.argument){
 			data.argument = [];
@@ -40,7 +41,7 @@ class Directive{
 				name    : attr.name,
 				type    : attr.type,
 				line    : attr.line,
-				public  : true,
+				public  : false,
 				default : attr.default
 			});
 		}
