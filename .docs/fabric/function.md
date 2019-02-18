@@ -1,50 +1,26 @@
-Function calls are designed with asynchronous and multithreading in mind.
-A typical call should be executed like;
-```
-execute(attr1, attr2) -> result when {
+# Fabric: Function
 
-} then {
-
+## Definintion
+```Fabric
+returns name( arguments ){
+  code
 }
 ```
 
-This means that the function with name ``execute`` will be running, and any return values will be piped into the local variable ``result``. The code within the ``when`` clause is executed whenever the function yields a value. When the function has finished execution code within the ``then`` clause will be executed, and all data within the execution will be wiped.  
-When a function is called asynchronously it is pushed to the event loop. If this execution is to be executed within another thread then when the function yields/returns a result the ``when``/``then`` clause will be executed within the thread that the function was originally called from.  
-This helps prevent data races within a function.  
-
-It is imporant to note that when a ``return`` occurs all but the return value is unallocated within the function's scope. This return value is then unallocated once the caller has transfered the information to it's local scope or other destination.
+**Returns** is the name of the type of data which this function will return.  
+**Name** is the non-broken word (doesn't include any special tokens i.e. ``+``, ``-``) which will be used to refer to the function during calling.
+**Arguments** are defined exactly the same as any other [variable](./variable-defininition.md).
 
 
-This method of function calls is designed to eliminate the current methods being used for callbacks when reading a stream of data. Previously if you wanted to listen for TCP requests on a certain port you would need to define a new function specifically for this task, thus it will now have a different local scope from when it was called. However, within fabric, this can be done in a simpler way.
+## Argument upgradeability
+It is important to note that argument definitions within a function definition's argument space have the special characteristic to be marked as ``upgradeable``. Marking an argument as upgradeable allows the function to be recompiled to handle function inputs where the argument type is an extention of the type specified. Upgradeability is marked via having a ``^`` directly before the argument type with no spaces inbetween (note this is before the ``@`` to specify the type as a pointer).  
+### Example
+Upgradeability allows the programmer to enforce certain characteristics in an input variable without explicitly locking the funciton to one set of types. For instance the function below will be able to not just take ``Float`` variables, but any variable of a type that extends from a ``Float`` such as a ``Double``.
+Hence this function could take; ``(Float Float)``, ``(Double Double)``, ``(Double Float)``, or ``(Float Double)``.
 ```
-TcpListen(8080) -> res when{
-  // Code to handle a TCP request
-}
-```
-Or streaming a file
-```
-ReadFile('file.txt') -> chunk when{
-  // When a chunk of data is received
-} then {
-  // When the final chunk of data is received
+Float Add(^Float a, ^Float b){
+  return a + b;
 }
 ```
 
-## Different types of calls
-If all you want is the final value, and you want execution to happen synchronously then you can instead use an ``=>``.  
-To execute the function within a different thread from its self ``->``.  
-To execute the function within the main thread you can use ``~>``.  
-
-### Why execute something in the main thread?
-If you have a global variable such as a counter and multiple threads try to increment the value at the same time they will overwrite one another causing the number to not increase correct and have unexpected behaviour. To allow global values with a variety of behaviour you need to create the function to specifically edit them safely.
-```
-int counter = 0;
-
-void Increment(){
-  counter++;
-}
-
-TcpListen(8080) -> res when {
-  Increment() ~> ?
-}
-```
+Since we know that the argument will be at least of class ``Float`` we know it will definitly have certain attributes and class behaviour which is necessary.

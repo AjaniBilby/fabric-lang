@@ -1,1 +1,0 @@
-Hard statically typed structures.
