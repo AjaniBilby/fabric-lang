@@ -21,7 +21,7 @@ class Project{
 
 		// Load in the critical components of the standard library
 		this.load(
-			path.join(__dirname, './../../local/std/primative.json'),
+			path.join(__dirname, './../../std/primative.json'),
 			'compiler',
 			false
 		);
