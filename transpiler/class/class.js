@@ -22,13 +22,13 @@ class Class{
 		this.primitive   = this.isPrimivite ? data.primitive : null;
 		this.lable       = this.isPrimivite ? this.primitive : `C_${this.id.toString(16)}`;
 
+		if (this.owner.expose.indexOf(this.name) != -1){
+			this.exposed = true;
+		}
+
 		if (this.name == "Wild"){
 			this.extends = null;
 		}
-	}
-
-	expose(){
-		this.exposed = true;
 	}
 
 	link(){
@@ -87,11 +87,12 @@ class Class{
 		// Check all attribute types exist and names do not collide
 		let reserve = [];
 		for (let attr of this.attribute){
-			if (attr.name in reserve){
+			if (reserve.indexOf(attr.name) !== -1){
 				console.error(`Error: Invalid class definition. Invalid attribute '${attr.name}' due to that name already being used within the class.`);
 				console.error(`  file  : ${this.owner.shortPath}`);
-				console.error(`  line ${attr.line || this.line}`);
-				this.owner.error = ture;
+				console.error(`  line  : ${attr.line || this.line}`);
+				this.owner.error = true;
+				continue;
 			}
 
 			res = this.owner.get(attr.type);
@@ -101,9 +102,12 @@ class Class{
 				console.error(`  class : ${this.name}`);
 				console.error(`  line  : ${attr.line || this.line}`);
 				this.owner.error = true;
+				continue;
 			}else{
 				attr.type = res;
 			}
+
+			reserve.push(attr.name);
 		}
 	}
 

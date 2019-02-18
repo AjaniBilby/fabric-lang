@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
-const Interpret = require('./../interpreter/lexer.js');
+const Lexer = require('./../interpreter/lexer.js');
 
 const Directive = require('./directive.js');
 const Project = require('./project.js');
@@ -24,21 +24,22 @@ class File{
 		this.shortPath = filename;
 
 		this.directive = [];
-		this.exports   = [];
 		this.class     = [];
 		this.library   = [{id: 0, as: "*"}];
+		this.expose    = [];
 
 		// Read in data
 		let data = {};
 		let extension = path.extname(filename);
 		if (extension == ".json"){
+			console.log('JOSN', filename);
 			data = JSON.parse( fs.readFileSync(filename, 'utf8') );
 		}else if (extension == ".fab"){
-			data = Interpret( fs.readFileSync(filename, 'utf8'), filename );
+			data = Lexer.Interpret( fs.readFileSync(filename, 'utf8'), filename );
 		}else{
 			console.error(`Invalid file type ${path.extname(filename)}`);
 			console.error(`  importer : ${importer}`);
-			console.error(`  filename : ${path.extname(filename)}`)
+			console.error(`  filename : ${path.extname(filename)}`);
 			process.exit(1);
 		}
 		if (!data.expose){
@@ -84,16 +85,7 @@ class File{
 				continue;
 			}
 
-			let ref = this.getLocal(item.name);
-			if (ref == null){
-				console.error(`Invalid exposure of '${item.name}'. No such class or function exists`);
-				console.error(`  Note: You cannot expose a class' function, instead only the class its self`);
-				console.error(`  line: ${item.line}`);
-				this.error = true;
-				continue;
-			}
-
-			ref.expose();
+			this.expose.push(item.name);
 		}
 	}
 
@@ -128,6 +120,36 @@ class File{
 		}
 		for (let item of this.class){
 			item.compile();
+		}
+	}
+
+	GetClassByName(name, history = [], local = true){
+		if (history.indexOf(this) != -1){
+			return null;
+		}
+		history.push(this);
+
+		for (let item of this.class){
+			if (item.name == name){
+				if (false == (local == false && item.exposed == false)){
+					return item;
+				}
+			}
+		}
+
+		for (let file of this.owner.files){
+			let res = file.GetClassByName(name, history, false);
+			if (res !== null){
+				return res;
+			}
+		}
+
+		return null;
+	}
+
+	GetFunction(name, sign){
+		if ((sign instanceof Signature) == false){
+			sign = new Signature(this, sign);
 		}
 	}
 

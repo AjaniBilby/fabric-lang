@@ -33,7 +33,7 @@
 		"pipe"      : "=>"
 	},
 	"bracket": {
-		"curley" : ["{", "}"],
+		"curly" : ["{", "}"],
 		"round"  : ["(", ")"],
 		"square" : ["[", "]"]
 	},
@@ -120,13 +120,21 @@
 
 		{
 			"name": "function",
-			"match" : ["namespace", "namespace", "bracket.round", "bracket.curley"],
+			"match" : ["namespace", "namespace", "bracket.round", "bracket.curly"],
 			"sub"   : [
 				null,
 				null,
 				["definition.assign", "definition"],
 				["code"]
 			]
+		},{
+			"name"  : "call.function.async",
+			"match" : ["namespace", "bracket.round", "token.pipe", "bracket.curly"],
+			"sub"   : [null,        "argument",       null,        "code"]
+		},{
+			"name"  : "call.function.sync",
+			"match" : ["keyword.await", "namespace", "bracket.round"],
+			"sub"   : [null,            null,        "argument"]
 		},
 
 
@@ -141,14 +149,14 @@
 			"sub": null
 		},{
 			"name": "class",
-			"match" : ["keyword.class", "namespace", "bracket.curley"],
+			"match" : ["keyword.class", "namespace", "bracket.curly"],
 			"sub"   : [
 				null, null,
 				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
 			]
 		},{
 			"name"  : "class",
-			"match" : ["keyword.class", "namespace", "keyword.extends", "namespace", "bracket.curley"],
+			"match" : ["keyword.class", "namespace", "keyword.extends", "namespace", "bracket.curly"],
 			"sub"   : [
 				null,
 				null,
@@ -158,6 +166,31 @@
 			]
 		},
 
+
+
+		{
+			"name"  : "for",
+			"match" : ["keyword.for", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "code", "code"]
+		},{
+			"name"  : "while",
+			"match" : ["keyword.while", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},
+
+		{
+			"name"  : "if",
+			"match" : ["keyword.if", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},{
+			"name"  : "elseif",
+			"match" : ["keyword.elseif", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},{
+			"name"  : "else",
+			"match" : ["keyword.else", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},
 
 
 		{

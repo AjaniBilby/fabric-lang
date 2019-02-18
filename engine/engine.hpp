@@ -1,4 +1,6 @@
 #pragma once
+#define Engine_Build 1
+
 
 namespace Engine{
 	namespace ThreadPool{

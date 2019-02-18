@@ -1,3 +1,6 @@
+const BuildNo = 1;
+
+
 const File = require('./file.js');
 const path = require('path');
 const fs   = require('fs');
@@ -58,6 +61,11 @@ Project.prototype.save = function(outputName){
 
 	let enginePath = path.join(__dirname, "./../../engine/engine.hpp");
 	stream.write(`#include "${enginePath}"\n`);
+
+
+	stream.write(`#if Engine_Build != ${BuildNo}\n`);
+	stream.write(`#error "Compiler version miss match"\n`);
+	stream.write(`#endif\n`);
 
 
 	/*-----------------------------------
