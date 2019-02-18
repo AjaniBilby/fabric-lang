@@ -1,0 +1,209 @@
+{
+	"string": [
+		{
+			"name": "unicode",
+			"match": "\""
+		}, {
+			"name": "ascii",
+			"match": "'"
+		}
+	],
+	"comment": [
+		["//", "\n"],
+		["/*", "*/"]
+	],
+	"token": {
+		"add"      : "+",
+		"subtract" : "-",
+		"divide"   : "/",
+		"multiply" : "*",
+		"modulo"   : "%",
+
+		"and"        : "&",
+		"or"         : "|",
+		"not"        : "!",
+		"greatEqual" : "<=",
+		"lessEqual"  : ">=",
+		"aproxEqual" : "~=",
+		"equalTo"    : "==",
+
+		"assign"    : "=",
+		"colon"     : ":",
+		"semicolon" : ";",
+		"pipe"      : "=>"
+	},
+	"bracket": {
+		"curly" : ["{", "}"],
+		"round"  : ["(", ")"],
+		"square" : ["[", "]"]
+	},
+	"keyword": [
+		"import", "expose", "as",
+		"return",
+
+		"class", "public", "private", "extends",
+
+		"await",
+
+		"for", "while",
+		"continue", "break",
+
+		"if",
+		"else",
+		"elseif"
+	],
+
+
+	"pattern": [
+		{
+			"name"  : "import",
+			"match" : ["keyword.import", "string.unicode", "keyword.as", "namespace", "token.semicolon"],
+			"sub"   : null
+		},{
+			"name"  : "import",
+			"match" : ["keyword.import", "string.unicode", "token.semicolon"],
+			"sub"   : null
+		},{
+			"name"  : "import",
+			"match" : ["keyword.import", "string.ascii", "keyword.as", "namespace", "token.semicolon"],
+			"sub"   : null
+		},{
+			"name"  : "import",
+			"match" : ["keyword.import", "string.ascii", "token.semicolon"],
+			"sub"   : null
+		},{
+			"name"  : "expose",
+			"match" : [ "keyword.expose", "namespace", "token.semicolon" ],
+			"sub"   : null
+		},
+
+		{
+			"name": "expression",
+			"match" : ["*"],
+			"sub"   : null
+		},{
+			"name": "code",
+			"match" : ["*"],
+			"sub"   : [
+				["definition", "definition.assign", "assign", "return"]
+			]
+		},
+
+
+
+		{
+			"name": "definition.assign",
+			"match" : ["namespace", "namespace", "token.assign", "*", "token.semicolon"],
+			"sub"   : [
+				null,
+				null,
+				null,
+				["expression"],
+				null
+			]
+		},{
+			"name": "definition",
+			"match" : ["namespace", "namespace", "token.semicolon"],
+			"sub"   : [ null,        null]
+		},{
+			"name": "assign",
+			"match" : ["namespace", "token.assign", "*",         "token.semicolon"],
+			"sub"   : [
+				null,
+				null,
+				["expression"],
+				null
+			]
+		},
+
+
+
+		{
+			"name": "function",
+			"match" : ["namespace", "namespace", "bracket.round", "bracket.curly"],
+			"sub"   : [
+				null,
+				null,
+				["definition.assign", "definition"],
+				["code"]
+			]
+		},{
+			"name"  : "call.function.async",
+			"match" : ["namespace", "bracket.round", "token.pipe", "bracket.curly"],
+			"sub"   : [null,        "argument",       null,        "code"]
+		},{
+			"name"  : "call.function.sync",
+			"match" : ["keyword.await", "namespace", "bracket.round"],
+			"sub"   : [null,            null,        "argument"]
+		},
+
+
+
+		{
+			"name": "modifier.public",
+			"match": ["keyword.public", "token.colon"],
+			"sub": null
+		},{
+			"name": "modifier.private",
+			"match": ["keyword.private", "token.colon"],
+			"sub": null
+		},{
+			"name": "class",
+			"match" : ["keyword.class", "namespace", "bracket.curly"],
+			"sub"   : [
+				null, null,
+				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
+			]
+		},{
+			"name"  : "class",
+			"match" : ["keyword.class", "namespace", "keyword.extends", "namespace", "bracket.curly"],
+			"sub"   : [
+				null,
+				null,
+				null,
+				null,
+				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
+			]
+		},
+
+
+
+		{
+			"name"  : "for",
+			"match" : ["keyword.for", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "code", "code"]
+		},{
+			"name"  : "while",
+			"match" : ["keyword.while", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},
+
+		{
+			"name"  : "if",
+			"match" : ["keyword.if", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},{
+			"name"  : "elseif",
+			"match" : ["keyword.elseif", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},{
+			"name"  : "else",
+			"match" : ["keyword.else", "bracket.round", "bracket.curly"],
+			"sub"   : [null, "expression", "code"]
+		},
+
+
+		{
+			"name": "return",
+			"match": [ "keyword.return", "*", "token.semicolon" ],
+			"sub": null
+		}
+	],
+
+	"root": [
+		"class",
+		"function",
+		"import",
+		"expose"
+	]
+}
