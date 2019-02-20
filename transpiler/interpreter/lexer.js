@@ -329,6 +329,12 @@ function Patternize(tokens, patterns, filename = "Unknown"){
 							continue lMatch;
 						}
 					}
+				}else if (patterns[j].match[k] == "+"){
+					match[k].push(tokens[offset]);
+					progress++;
+					offset++;
+
+					continue;
 				}else if (patterns[j].match[k] == "*"){
 					// If the wild char is the last matching term
 					if (k+1 >= patterns[j].match.length){

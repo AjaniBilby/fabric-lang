@@ -19,11 +19,13 @@
 		"multiply" : "*",
 		"modulo"   : "%",
 
+		"not"        : "!",
 		"and"        : "&",
 		"or"         : "|",
-		"not"        : "!",
 		"greatEqual" : "<=",
 		"lessEqual"  : ">=",
+		"greater"    : "<",
+		"lesser"     : ">",
 		"aproxEqual" : "~=",
 		"equalTo"    : "==",
 
@@ -77,10 +79,84 @@
 			"sub"   : null
 		},
 
+
+
+		{
+			"name"  : "operation.add",
+			"match" : ["+", "token.add", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.subtract",
+			"match" : ["+", "token.subtract", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.divide",
+			"match" : ["+", "token.divide", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.multiply",
+			"match" : ["+", "token.multiply", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.modulo",
+			"match" : ["+", "token.modulo", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.and",
+			"match" : ["+", "token.and", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.or",
+			"match" : ["+", "token.or", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.not",
+			"match" : ["token.not", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.greater",
+			"match" : ["+", "token.greater", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.lesser",
+			"match" : ["+", "token.lesser", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.greatEqual",
+			"match" : ["+", "token.greatEqual", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.lessEqual",
+			"match" : ["+", "token.lessEqual", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.approxEqual",
+			"match" : ["+", "token.add", "+"],
+			"sub"   : null
+		},{
+			"name"  : "operation.equalTo",
+			"match" : ["+", "token.add", "+"],
+			"sub"   : null
+		},
+
+
+
+
 		{
 			"name": "expression",
 			"match" : ["*"],
-			"sub"   : null
+			"sub"   : [[
+				"opperation.add",        "opperation.subtract",
+				"opperation.multiply",   "opperation.divide",
+				"opperation.modulo",
+
+				"opperation.greatEqual", "opperation.lessEqual",
+				"opperation.greater",    "opperation.lesser",
+				"opperation.appoxEqual", "opperation.equalTo",
+
+				"opperation.and",        "opperation.or",
+				"opperation.not"
+			]]
 		},{
 			"name": "code",
 			"match" : ["*"],
