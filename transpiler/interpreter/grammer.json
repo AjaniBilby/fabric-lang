@@ -51,8 +51,7 @@
 		"continue", "break",
 
 		"if",
-		"else",
-		"elseif"
+		"else"
 	],
 
 
@@ -260,8 +259,8 @@
 			"sub"   : [null, "expression", "code"]
 		},{
 			"name"  : "elseif",
-			"match" : ["keyword.elseif", "bracket.round", "bracket.curly"],
-			"sub"   : [null, "expression", "code"]
+			"match" : ["keyword.else", "keyword.if", "bracket.round", "bracket.curly"],
+			"sub"   : [null, null, "expression", "code"]
 		},{
 			"name"  : "else",
 			"match" : ["keyword.else", "bracket.round", "bracket.curly"],
