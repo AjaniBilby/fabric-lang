@@ -61,11 +61,14 @@ class Directive{
 	 * @param {Object} data
 	 */
 	constructor(owner, data){
+		this.linked = false;
+
 		this.owner = owner;
 		this.exposed = false;
 
 		this.id = owner.owner.GetUniqueFunctionID();
 		this.lable = "F_"+this.id.toString(16);
+		this.raw  = data;
 		this.name = data.name;
 		this.return = data.return;
 
@@ -80,16 +83,35 @@ class Directive{
 			this.exposed = true;
 		}
 
-		this.args = data.argument.length;
-		this.local = new Class(this.owner, {
-			name: this.name+"_LocalNameSpace",
-			attribute: data.argument.concat(data.local)
-		});
-		this.owner.class.push(this.local);
+		this.arguments = data.argument;
+		this.local     = data.local;
+		this.temp      = [];
+
+		this.definedVars = data.local;
 	}
 
 	link(){
-		// Generate a signature
+		if (this.linked == true){
+			return;
+		}
+		this.linked = true;
+
+		for (let i=0; i<this.arguments.length; i++){
+			this.arguments[i].public = true;
+		}
+		for (let i=0; i<this.local.length; i++){
+			this.local[i].public = false;
+		}
+		for (let i=0; i<this.temp.length; i++){
+			this.temp[i].public = false;
+		}
+
+		this.local = new Class(this.owner, {
+			name: this.name+"_LocalNameSpace",
+			attribute: this.arguments.concat(this.local).concat(this.temp)
+		});
+		this.owner.class.push(this.local);
+		this.local.link();
 	}
 	compile(){
 		let lines = [];

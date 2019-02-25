@@ -9,8 +9,9 @@ class Class{
 	 * @param {Object}    data
 	 */
 	constructor(owner, data){
-		this.owner = owner;
+		this.owner   = owner;
 		this.exposed = false;
+		this.linked  = false;
 
 		this.id = this.owner.owner.GetUniqueClassID();
 		this.name        = data.name;
@@ -32,6 +33,11 @@ class Class{
 	}
 
 	link(){
+		if (this.linked == true){
+			return;
+		}
+		this.linked = true;
+
 		if (this.name == "wild"){
 			return;
 		}
@@ -77,9 +83,11 @@ class Class{
 					type: this.extends.name,
 					line: 0,
 					col: 0,
-					public: false
+					public: false,
+					pointer: false
 				}].concat(this.attribute);
 			}else{
+				this.extends.link();
 				this.attribute = this.extends.attribute.concat(this.attribute)
 			}
 		}
@@ -152,7 +160,7 @@ class Class{
 
 		let lines = [];
 		for (let attr of this.attribute){
-			lines.push(`${attr.type.lable} ${attr.name};`);
+			lines.push(`${attr.type.lable}${attr.pointer? "*" : ""} ${attr.name};`);
 		}
 
 		this.owner.owner.strucutres.push({

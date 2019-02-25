@@ -61,11 +61,11 @@ function InterpFunction(pattern){
 
 		// Get type and modifiers
 		if (item.data[0][0].data[0] == "^"){
-			item.data[0][0].data[0] = item.data[0][0].data[0].slice(1);
+			item.data[0][0].data[0] = item.data[0][0].data.slice(1);
 			arg.upgradeable = true;
 		}
 		if (item.data[0][0].data[0] == "@"){
-			item.data[0][0].data[0] = item.data[0][0].data[0].slice(1);
+			item.data[0][0].data[0] = item.data[0][0].data.slice(1);
 			arg.pointer = true;
 		}
 		arg.type = item.data[0][0].data;
@@ -130,7 +130,7 @@ function InterpClass(pattern){
 
 			// Get type and modifiers
 			if (item.data[0][0].data[0] == "@"){
-				item.data[0][0].data = item.data[0][0].data[0].slice(1);
+				item.data[0][0].data = item.data[0][0].data.slice(1);
 				attr.pointer = true;
 			}
 			attr.type = item.data[0][0].data;

@@ -57,13 +57,52 @@ function Tokenize(text){
 			if (stack.length > 0){
 				let isKeyword = grammer.keyword.indexOf(stack) != -1;
 
-				out.push({
-					type: isKeyword ? `keyword.${stack}` : "namespace",
-					data: stack,
+				if (isKeyword){
+					out.push({
+						type: `keyword.${stack}`,
+						data: stack,
 
-					col  : lastCol+j-stack.length,
-					line : line,
-				});
+						col  : lastCol+j-stack.length,
+						line : line,
+					});
+				}else{
+					if      (stack == "true"){
+						out.push({
+							type: "constant",
+							struct: "Bool",
+							data: "true",
+
+							col  : lastCol+j-stack.length,
+							line : line,
+						});
+					}else if (stack == "false"){
+						out.push({
+							type: "constant",
+							struct: "Bool",
+							data: "false",
+
+							col  : lastCol+j-stack.length,
+							line : line,
+						});
+					}else if (isNaN(stack) == false){
+						out.push({
+							type: "constant",
+							struct: "Number",
+							data: stack,
+
+							col  : lastCol+j-stack.length,
+							line : line,
+						});
+					}else{
+						out.push({
+							type: `namespace`,
+							data: stack,
+
+							col  : lastCol+j-stack.length,
+							line : line,
+						});
+					}
+				}
 
 				stack = "";
 			}
@@ -329,13 +368,13 @@ function Patternize(tokens, patterns, filename = "Unknown"){
 							continue lMatch;
 						}
 					}
-				}else if (patterns[j].match[k] == "+"){
+				}else if (patterns[j].match[k] == "+"){  // Single char wild
 					match[k].push(tokens[offset]);
 					progress++;
 					offset++;
 
 					continue;
-				}else if (patterns[j].match[k] == "*"){
+				}else if (patterns[j].match[k] == "*"){  // Multi char wild
 					// If the wild char is the last matching term
 					if (k+1 >= patterns[j].match.length){
 						match[k] = tokens.slice(offset);
@@ -440,7 +479,9 @@ function Process(text, filename){
 		directive: []
 	};
 
-	let patterns = Patternize(Tokenize(text), grammer.root, filename);
+	let tokens = Tokenize(text);
+	console.log('raw', tokens);
+	let patterns = Patternize(tokens, grammer.root, filename);
 	for (let pattern of patterns){
 		if       (pattern.type == "expose"){
 			out.expose.push({

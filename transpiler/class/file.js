@@ -32,7 +32,6 @@ class File{
 		let data = {};
 		let extension = path.extname(filename);
 		if (extension == ".json"){
-			console.log('JOSN', filename);
 			data = JSON.parse( fs.readFileSync(filename, 'utf8') );
 		}else if (extension == ".fab"){
 			data = Lexer.Interpret( fs.readFileSync(filename, 'utf8'), filename );
