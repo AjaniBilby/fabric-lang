@@ -34,7 +34,8 @@
 		"assign"    : "=",
 		"colon"     : ":",
 		"semicolon" : ";",
-		"pipe"      : "=>"
+		"pipe"      : "=>",
+		"seperator" : ","
 	},
 	"bracket": {
 		"curly" : ["{", "}"],

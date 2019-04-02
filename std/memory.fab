@@ -1,5 +1,3 @@
-import "memory.json"
-
 @void Allocate (wild Address, size_t bytes)  primative Memory::Allocate;
 @void Free (wild Address, size_t bytes)      primative Memory::UnAllocate;
 

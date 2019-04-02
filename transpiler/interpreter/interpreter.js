@@ -8,6 +8,9 @@ function InterpVarDef(token, isPublic = false){
 		name : null,
 		type : null,
 
+		isSubject: false,
+		modifier: [],
+
 		// Meta type
 		pointer     : false,
 		upgradeable : false,
@@ -32,15 +35,49 @@ function InterpVarDef(token, isPublic = false){
 		offset++;
 	}
 
+
 	// Get variable type name
 	out.type = token.data[0].slice(offset);
 
-	// Get variable name
-	out.name = token.data[1];
+	// Strip subject modifier
+	//  Also gets variable name
+	if (token.type == "definition.subject" || token.type == "definition.subject.assign"){
+		out.isSubject = true;
+
+		let len = token.data[2].length;
+		for (let i=0; i<token.data[2].length; i++){
+			if (token.data[2].data[i].type != "namespace"){
+				console.error(`Error: Invalid subject modifier "${token.data[2].data[i].data}".`);
+				console.error(`  line : ${token.data[2].data[i].line}`);
+				console.error(`  col  : ${token.data[2].data[i].col}`);
+				process.exit(1);
+			}
+
+			out.modifier.push(token.data[2].data[i].data);
+
+			if (i+1 < len && token.data[2].data[i+1].type != "token.seperator"){
+				console.error(`Error: Missing comma after subject modifier.`);
+				console.error(`  line : ${token.data[2].data[i].line}`);
+				console.error(`  col  : ${token.data[2].data[i].col}`);
+				process.exit(1);
+
+				continue;
+			}
+		}
+
+		// Get variable name
+		out.name = token.data[4];
+	}else{
+		// Get variable name
+		out.name = token.data[1];
+	}
+
 
 	// Get variable defaults
 	if (token.type == "definition.assign"){
 		out.default = data[3];
+	}else if (token.type == "definition.subject.assign"){
+		out.default = data[6];
 	}
 
 	return out;
@@ -86,7 +123,10 @@ function InterpFunc  (pattern){
 	// Search code tree for local variable definitions
 	function GetLocal(pattern){
 		for (let pat of pattern.data){
-			if (pat.type == "definition" || pat.type == "definition.assign"){
+			if (
+				pat.type == "definition" || pat.type == "definition.assign" ||
+				pat.type == "definition.subject" || pat.type == "definition.assignment.subject"
+			){
 				returns.local.push(InterpVarDef(pat));
 			}else if (pat.type == "code"){
 				GetLocal(pat.data[0]);
@@ -144,7 +184,10 @@ function InterpClassComp(patterns){
 			continue;
 		}
 
-		if (item.type == "definition" || item.type == "definition.assignment"){
+		if (
+			item.type == "definition" || item.type == "definition.assignment" ||
+			item.type == "definition.subject" || item.type == "definition.assignment.subject"
+		){
 			out.attributes.push(InterpVarDef(item, isPublic));
 		}else	if (item.type == "function"){
 			out.methods.push(InterpFunc(item));
