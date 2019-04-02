@@ -45,7 +45,9 @@
 		"import", "expose", "as",
 		"return",
 
-		"class", "public", "private", "extends",
+		"class", "subject",
+		"public", "private",
+		"extends", "primative",
 
 		"await",
 
@@ -98,7 +100,7 @@
 
 
 		{
-			"name": "definition.assign",
+			"name"  : "definition.assign",
 			"match" : ["namespace", "namespace", "token.assign", "*", "token.semicolon"],
 			"sub"   : [
 				null,
@@ -108,11 +110,34 @@
 				null
 			]
 		},{
-			"name": "definition",
+			"name"  : "definition",
 			"match" : ["namespace", "namespace", "token.semicolon"],
 			"sub"   : [ null,        null]
 		},{
-			"name": "assign",
+			"name"  : "definition.subject",
+			"match" : ["namespace", "lesser", "namespace", "greater", "namespace"],
+			"sub"   : [
+				null,
+				null,
+				null,
+				null,
+				null
+			]
+		},{
+			"name"  : "definition.subject.assign",
+			"match" : ["namespace", "token.lesser", "namespace", "token.greater", "namespace", "token.assign", "*", "token.semicolon"],
+			"sub"   : [
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				["expression"],
+				null
+			]
+		},{
+			"name"  : "assign",
 			"match" : ["namespace", "token.assign", "*",         "token.semicolon"],
 			"sub"   : [
 				null,
@@ -125,7 +150,7 @@
 
 
 		{
-			"name": "function",
+			"name"  : "function",
 			"match" : ["namespace", "namespace", "bracket.round", "bracket.curly"],
 			"sub"   : [
 				null,
@@ -133,6 +158,9 @@
 				["definition.assign", "definition"],
 				["code"]
 			]
+		},{
+			"name"  : "function.primative",
+			"match" : ["namespace", "namspace", "bracket.round", "keyword.primative", "token.semicolon"]
 		},{
 			"name"  : "call.function.async",
 			"match" : ["namespace", "bracket.round", "token.pipe", "bracket.curly"],
@@ -154,20 +182,30 @@
 			"match": ["keyword.private", "token.colon"],
 			"sub": null
 		},{
+			"name": "class.extend",
+			"match": ["keyword.extends", "namespace"],
+			"sub": null
+		},{
+			"name": "class.primative",
+			"match": ["keyword.primative", "namespace"],
+			"sub": null
+		},{
 			"name": "class",
-			"match" : ["keyword.class", "namespace", "bracket.curly"],
-			"sub"   : [
-				null, null,
+			"match": ["keyword.class", "namespace", "*", "bracket.curly"],
+			"sub": [
+				null,
+				null,
+				["class.extend", "class.primative"],
 				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
 			]
 		},{
-			"name"  : "class",
-			"match" : ["keyword.class", "namespace", "keyword.extends", "namespace", "bracket.curly"],
-			"sub"   : [
+			"name": "subject",
+			"match": ["keyword.class", "namespace", "bracket.round", "*", "bracket.curly"],
+			"sub"  : [
 				null,
 				null,
-				null,
-				null,
+				["definition"],
+				["class.extend", "class.primative"],
 				["definition.assign", "definition", "function", "modifier.public", "modifier.private"]
 			]
 		},

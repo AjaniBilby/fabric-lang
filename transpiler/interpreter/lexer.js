@@ -279,6 +279,7 @@ function Tokenize(text){
 	return out;
 }
 
+
 function Patternize(tokens, patterns, filename = "Unknown"){
 	// Get pattern references from names
 	patterns = GetPatternsByNames(patterns);
@@ -442,7 +443,10 @@ function Patternize(tokens, patterns, filename = "Unknown"){
 		if (best.percent == 1){
 			out.push({
 				type: best.type,
-				data: best.data
+				data: best.data,
+
+				line: best.data[0].line,
+				col : best.data[0].col
 			});
 			i += best.tokens-1;
 			continue outer;
@@ -480,7 +484,6 @@ function Process(text, filename){
 	};
 
 	let tokens = Tokenize(text);
-	console.log('raw', tokens);
 	let patterns = Patternize(tokens, grammer.root, filename);
 	for (let pattern of patterns){
 		if       (pattern.type == "expose"){
@@ -507,6 +510,8 @@ function Process(text, filename){
 			continue;
 		}else if (pattern.type == "class"){
 			out.class.push    ( Interpret.Class(pattern) );
+		}else if (pattern.type == "subject"){
+			out.class.push    ( Interpret.Subject(pattern) );
 		}else if (pattern.type == "function"){
 			out.directive.push( Interpret.Function(pattern) );
 		}

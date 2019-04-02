@@ -1,0 +1,92 @@
+import "container.fab" as Memory;
+import "memory.fab" as Memory;
+
+subject Vector(Type) extends Container<Type, 0>{
+	private:
+		size_t length;
+		size_t heap;
+
+		@Type reference;
+
+	public:
+		void __construct__(){
+			this.length = 0;
+			this.heap = 0;
+			this.reference = nullptr;
+
+			return;
+		}
+		void __destruct__(){
+			Memory::Free(this.reference);
+
+			return;
+		}
+
+
+		void __duplicate__(@Vector<Type> to){
+			size_t bytes = sizeof(Type) * this.heap;
+			to.reserve(this.heap);
+
+			Memory.Duplicate(this.reference, to.reference, bytes);
+
+			return;
+		}
+
+		@Type __get__(size_t index){
+			if (index < this.size){
+				return this.reference + (index * sizeof(Type));
+			}
+
+			console.error(new Error(
+				"Index error: cannot get element " + index.toString() + " of " + this.size.toString()
+			).toString());
+			stop();
+		}
+
+		void __add__(Vector<Type> value){
+			this.push_back(value);
+
+			return;
+		}
+
+		void __duplicate__(@Vector<Type> to){
+			// Create space in the target vector
+			to.resize(this.size);
+
+			// Duplicate the values across
+			Memory.Duplicate(@this.addr, @to.addr, this.size);
+		}
+
+
+
+		void reserve(size_t items){
+			@Type to = Memory.Allocate(items * sizeof(Type));
+
+			size_t min = items;
+			if (this.heap < min){
+				min = this.heap;
+			}
+
+			Memory::Duplicate(@this.reference, @to, min);
+			return;
+		}
+		void resize(size_t items){
+			if (items > this.heap){
+				this.reserve(items);
+			}
+
+			this.length = items;
+			return;
+		}
+
+		void push_back(Vector<Type> value){
+			size_t i = this.length;
+			this.resize(i+1);
+
+			this[i] = value;
+
+			return;
+		}
+}
+
+expose Vector;

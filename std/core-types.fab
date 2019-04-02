@@ -1,0 +1,37 @@
+class wild primative void {}
+class void primative void {}
+
+
+class bool primative bool {}
+
+
+class number                                 {}
+
+class int    primative int    extends number {}
+class uint   primative        extends int    {}
+
+class u8  primative uint      extends uint   {}
+class u16 primative uint8     extends u8     {}
+class u32 primative uint16    extends u32    {}
+class u64 primative uint32    extends u64    {}
+
+class size_t primative size_t extends uint   {}
+
+class i8   primative int      extends uint   {}
+class i16  primative int8     extends i8     {}
+class i32  primative int16    extends i16    {}
+class i64  primative int32    extends i32    {}
+
+class float  primative float  extends number {}
+class double primative double extends float  {}
+
+
+
+expose wild; expose void;
+expose bool;
+expose number;
+expose int; expose uint;
+expose u8; expose u16; expose u32; expose u64;
+expose size_t;
+expose i8; expose i16; expose i32; expose i64;
+expose float; expose double;

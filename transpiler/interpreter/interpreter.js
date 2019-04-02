@@ -1,159 +1,222 @@
-function InterpFunction(pattern){
-	let func = {
-		name: pattern.data[1][0].data,
-		line: pattern.data[0][0].line,
-		return: pattern.data[0][0].data,
+/**
+ * Interprets a variable definition from 'definition' or 'definition.assign' pattern
+ * @param {Object} token
+ */
+function InterpVarDef(token, isPublic = false){
+	let out = {
+		// Type/referencing
+		name : null,
+		type : null,
 
-		argument : [],
-		local    : [],
+		// Meta type
+		pointer     : false,
+		upgradeable : false,
+		public      : isPublic,
 
-		code: pattern.data[3]
-	};
+		// Debug info
+		line : token[0].line || NaN,
+		col  : token[0].col  || NaN,
 
-	function GetLocalVars(patterns){
-		for (let item of patterns){
-			if (item.type == "definition.assign" || item.type == "definition"){
-				let attr = {
-					name: item.data[1][0].data,
-					type: null,
-
-					upgradeable: false,
-					pointer    : false,
-					public     : false,
-					default    : null,
-
-					line: item.data[0][0].line,
-					col : item.data[0][0].col
-				};
-
-				// Get type and modifiers
-				if (item.data[0][0].data[0] == "@"){
-					item.data[0][0].data = item.data[0][0].data[0].slice(1);
-					attr.pointer = true;
-				}
-				attr.type = item.data[0][0].data;
-
-				func.local.push(attr);
-				continue;
-			}
-
-			if (typeof(item.data) == "object"){
-				for (let section of item.data){
-					GetLocalVars(section)
-				}
-			}
-		}
+		default: null
 	}
 
-	for (let item of pattern.data[2]){
-		let arg = {
-			name: item.data[1][0].data,
-			type: null,
+	let offset = 0;
 
-			upgradeable: false,
-			pointer    : false,
-			public     : true,
-			default    : null,
-
-			line: item.data[0][0].line,
-			col : item.data[0][0].col
-		};
-
-		// Get type and modifiers
-		if (item.data[0][0].data[0] == "^"){
-			item.data[0][0].data[0] = item.data[0][0].data.slice(1);
-			arg.upgradeable = true;
-		}
-		if (item.data[0][0].data[0] == "@"){
-			item.data[0][0].data[0] = item.data[0][0].data.slice(1);
-			arg.pointer = true;
-		}
-		arg.type = item.data[0][0].data;
-
-		// Get default value if it has one
-		if (item.type == "definition.assign"){
-			arg.default = item.data[3][0];
-		}
-
-		func.argument.push(arg);
+	// Get type meta
+	if (token.data[0][offset] == "^"){
+		out.upgradeable = true;
+		offset++;
+	}
+	if (token.data[0][offset] == "@"){
+		out.pointer = true;
+		offset++;
 	}
 
-	GetLocalVars(func.code);
+	// Get variable type name
+	out.type = token.data[0].slice(offset);
 
-	return func;
+	// Get variable name
+	out.name = token.data[1];
+
+	// Get variable defaults
+	if (token.type == "definition.assign"){
+		out.default = data[3];
+	}
+
+	return out;
 }
 
-function InterpClass(pattern){
-	let inherit = null;
-	let inner;
-	if (pattern.data.length == 5){
-		inherit = pattern.data[3][0].data;
-		inner = pattern.data[4];
-	}else{
-		inner = pattern.data[2];
+
+
+
+
+function InterpFunc  (pattern){
+	let out = {
+		name: pattern[1].data,
+
+		returns: {
+			name: "return",
+			type: null,
+
+			pointer     : false,
+			upgradeable : false,
+
+			line : pattern.data[0].line,
+			col  : pattern.data[0].col
+		},
+
+		arguments: [],
+		local:     [],
+
+		code: pattern.data[3].data[0]
 	}
 
-	let struct = {
-		name    : pattern.data[1][0].data,
-		extends : inherit,
 
-		attribute: [],
+	// Get return type
+	if (pattern.data[0][0] == "@"){
+		out.returns.type    = data[0].slice(1);
+		out.returns.pointer = true;
+	}
 
-		line: pattern.data[0][0].line,
+	// Get argument variables
+	for (let arg of pattern.data[2]){
+		returns.arguments.push(InterpVarDef(arg));
+	}
 
-		behaviour: []
+	// Search code tree for local variable definitions
+	function GetLocal(pattern){
+		for (let pat of pattern.data){
+			if (pat.type == "definition" || pat.type == "definition.assign"){
+				returns.local.push(InterpVarDef(pat));
+			}else if (pat.type == "code"){
+				GetLocal(pat.data[0]);
+			}
+		}
+	}
+	GetLocal(returns.code);
+
+	return out;
+}
+
+
+
+
+function InterpClassMod(tokens){
+	let modifier = {
+		extends   : null,
+		primative : null
+	}
+
+	// Read modifiers
+	for (let item of tokens){
+		if (item.name == "class.extend"){
+			modifier.extends = {
+				name : item.data[1],
+				line : item.data[1].line,
+				col  : item.data[1].col
+			};
+		}else if (item.name == "class.primative"){
+			modifier.primative = {
+				name : item.data[1],
+				line : item.data[1].line,
+				col  : item.data[1].col
+			};
+		}
+	}
+}
+
+function InterpClassComp(patterns){
+	let out = {
+		attributes : [],
+		methods    : []
 	};
 
-	let isPublic = true;
-	for (let item of inner){
+	let isPublic = false;
+
+	// Interp components
+	for (let item of patterns){
 		if (item.type == "modifier.public"){
 			isPublic = true;
 			continue;
-		}else if (item.type == "modifier.private"){
+		}
+		if (item.type == "modifier.private"){
 			isPublic = false;
 			continue;
 		}
 
-		if (item.type == "definition.assign" || item.type == "definition"){
-			let attr = {
-				name: item.data[1][0].data,
-				type: null,
+		if (item.type == "definition" || item.type == "definition.assignment"){
+			out.attributes.push(InterpVarDef(item, isPublic));
+		}else	if (item.type == "function"){
+			out.methods.push(InterpFunc(item));
+		}
 
-				upgradeable: false,
-				pointer    : false,
-				public     : isPublic,
-				default    : null,
+		console.error(`Error: Invalid pattern type "${item.type}" within class.`);
+		console.error(`  line : ${item.line}`);
+		console.error(`  col  : ${item.col}`);
+		process.exit(1);
+	}
 
-				line: item.data[0][0].line,
-				col : item.data[0][0].col
-			};
+	return out;
+}
 
-			// Get type and modifiers
-			if (item.data[0][0].data[0] == "@"){
-				item.data[0][0].data = item.data[0][0].data.slice(1);
-				attr.pointer = true;
-			}
-			attr.type = item.data[0][0].data;
+function InterpClass (pattern){
+	let out = {
+		name       : pattern.data[1],
+		modifier   : InterpClassMod(pattern.data[2]),
 
-			// Get default value if it has one
-			if (item.type == "definition.assign"){
-				attr.default = item.data[3][0];
-			}
+		referal    : [],
 
-			struct.attribute.push(attr);
+		attributes : [],
+		methods    : [],
+
+		line : pattern.data[0].line,
+		col  : pattern.data[0].col
+	};
+
+	let cache = InterpClassComp(pattern.data[3]);
+	out.attributes = cache.attributes;
+	out.methods = cache.methods;
+
+	return out;
+}
+function InterpSub   (pattern){
+	let out = {
+		name      : pattern.data[1],
+		modifier  : InterpClassMod(pattern.data[3]),
+
+		referalMarker : [],
+
+		attributes : [],
+		methods    : [],
+
+		line: pattern.data[0].line,
+		col : pattern.data[0].col
+	};
+
+	// Save referal marker terms, and check for any invalid ones
+	for (let item of pattern.data[2]){
+		if (item.type == "namespace"){
+			referalMarker.push(item.data);
 			continue;
 		}
 
-		if (item.type == "function"){
-			struct.behaviour.push( InterpFunction(item) );
-		}
+		console.error("Error: Invalid subject referal. Referals must be a single word.");
+		console.error(`  line : ${item.line}`);
+		console.error(`  col  : ${item.col}`);
+		process.exit(1);
 	}
 
-	return struct;
+	let cache = InterpClassComp(pattern.data[4]);
+	out.attributes = cache.attributes;
+	out.methods = cache.methods;
+
+	return out;
 }
 
 
+
 module.exports = {
-	Function: InterpFunction,
-	Class: InterpClass
+	Function: InterpFunc,
+	Class: InterpClass,
+	Subject: InterpSub
 };

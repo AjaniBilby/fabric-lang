@@ -1,0 +1,45 @@
+import "memory.fab" as Memory;
+import "vector.fab" as Memory;
+
+Subject Container(Type, Count){
+	public:
+		Bytes<Count>;
+
+		void __constructor__(){
+
+		}
+		void __destructor__(){}
+
+
+		@Type __get__(size_t index){
+			if (index >= Count){
+				console.error(Error("Index Error: Cannot get item "+index+" of "+Count));
+				stop();
+			}
+
+			@Type ptr = @this + (index * sizeof(Type));
+			return ptr;
+		}
+
+		Vector<Type> slice(size_t start = 0, size_t end = 0){
+			if (end == 0){
+				end = Count-1;
+			}else if (end >= Count){
+				end = Count-1;
+			}
+
+			// Get the number of bytes and elements that will be moved
+			size_t length = end - start;
+			size_t bytes = length * sizeof(Type);
+
+			Vector<Type> out;
+			out.reserve(length);
+
+			Memory::Duplicate(@this[0], @out[0], bytes);
+
+			return out;
+		};
+}
+
+
+expose Container;
