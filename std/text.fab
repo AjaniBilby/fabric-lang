@@ -1,0 +1,14 @@
+import "vector.fab"
+
+class ASCII_char extends uint8{}
+
+/**
+ * ASCII encoded Text
+ * When trying to get a specific character it will treat the data as ASCII, thus it will have undefined behaviour when working with unicode characters with width of more than 1B
+ */
+class Text extends Vector<ASCII_char>{
+	void toLowerCase(){
+
+	}
+	void toUpperCase(){}
+}

@@ -1,26 +1,53 @@
 import "memory.fab" as Memory;
 import "vector.fab" as Memory;
 
+/**
+ * A static length array defined at compile time
+ */
 Subject Container(Type, Count){
 	public:
-		Bytes<Count>;
+		Bytes<Count> data;
 
 		void __constructor__(){
-
 		}
 		void __destructor__(){}
 
-
+		/**
+		 * Get the address of a specified element
+		 * @param Specify which element by index number (starts from zero)
+		 */
 		@Type __get__(size_t index){
 			if (index >= Count){
-				console.error(Error("Index Error: Cannot get item "+index+" of "+Count));
-				stop();
+				throw "Index Error: Cannot get item "+index+" of "+Count;
 			}
 
 			@Type ptr = @this + (index * sizeof(Type));
 			return ptr;
 		}
 
+
+
+		/**
+		 * @return The number of elements this vector can hold without resizing
+		 */
+		size_t capacity(){
+			return Count;
+		}
+		/**
+		 * @return The length of the current vector
+		 */
+		size_t size(){
+			return Count;
+		}
+
+
+
+		/**
+		 * Get a sub section of this Container
+		 * @param Which index to start the slice at
+		 * @param Which index marks the end of the slice. (The slice will not include the element at this index)
+		 * @returns The subsection of the container in vector form
+		 */
 		Vector<Type> slice(size_t start = 0, size_t end = 0){
 			if (end == 0){
 				end = Count-1;

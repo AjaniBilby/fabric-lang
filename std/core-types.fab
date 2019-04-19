@@ -1,4 +1,18 @@
-class wild primative void {}
+class wild primative void {
+	/**
+	 * Make this object a bytewise duplicate of another
+	 */
+	void InterpretFrom(^wild other){
+		// Get the width of data to be moved
+		size_t size = sizeof(this);
+		if (sizeof(other) < size){
+			size = sizeof(other);
+		}
+
+		// Copy the data at a bytewise level
+		Memory.Duplicate(@other, @this, size);
+	}
+}
 class void primative void {}
 
 

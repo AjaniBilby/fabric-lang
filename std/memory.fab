@@ -1,5 +1,15 @@
-@void Allocate (wild Address, size_t bytes)  primative Memory::Allocate;
-@void Free (wild Address, size_t bytes)      primative Memory::UnAllocate;
+/**
+ * Allocates a heap of a specific size
+ * @param The the size in bytes of desired space
+ * @returns The address of a void at the beginning of the new heap
+ */
+@void Allocate (size_t bytes) primative Memory::Allocate;
+
+/**
+ * Frees a specific heap from memory
+ * @param The starting address of the heap to be deallocated
+*/
+@void Free (@wild Address) primative Memory::UnAllocate;
 
 expose Allocate;
 expose Free;
