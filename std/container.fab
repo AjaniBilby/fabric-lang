@@ -66,6 +66,20 @@ Subject Container(Type, Count){
 
 			return out;
 		};
+
+
+
+		/**
+		 * Set all elements in the container to the inputted value.
+		 * Note this will not change elements that are reserved, but not within the active range.
+		 * @param What value will all elements be set too?
+		 */
+		void fill(Type value){
+			size_t length = this.size();
+			for (size_t i=0; i<length; i++){
+				this[i] = value;
+			}
+		}
 }
 
 
