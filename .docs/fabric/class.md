@@ -41,7 +41,7 @@ All member classes with have ``this`` argument imposed on them as their first ar
 ### Special class functions: Expression handling
 | Name | Arguments | Description |
 |:--|:--|:--|
-| ``__add__``       | ``@Wild Other``, ``@TypeName destination`` | It is upto user disgresion what the ``Other`` type is, however this will be execute to complete expressions as necessary. The result must be placed, and can be developed/calcuated within the ``destination`` variable. Using this will prevent uncessesary data allocation to increase performance. |
+| ``__add__``       | ``Wild Other``, ``@TypeName destination`` | It is upto user disgresion what the ``Other`` type is, however this will be execute to complete expressions as necessary. The result must be placed, and can be developed/calcuated within the ``destination`` variable. Using this will prevent uncessesary data allocation to increase performance. |
 | ``__subtract__``  | - | - |
 | ``__modulo__``    | - | - |
 | ``__greater__``   | - | - |

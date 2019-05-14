@@ -80,6 +80,66 @@ Subject Container(Type, Count){
 				this[i] = value;
 			}
 		}
+
+		Vector<Type> __add__(^Container<Type> other){
+			size_t len = other.size();
+			Vector<Type> res(this);
+
+			// Attach the new elements to the existing item
+			res.concat(other);
+
+			return res;
+		}
+
+
+
+		/**
+		 * Find the index of a specific value
+		 *   Can start the search at a specific offset
+		 * @return a signed integer where -1 means the value was not found
+		 */
+		int64 indexOf(Type target, size_t startAt=0){
+			size_t len = this.size();
+
+			// Search through the container till the target value is found
+			while (startAt < len){
+				if (this[startAt] == target){
+					return startAt;
+				}
+
+				startAt++;
+			}
+
+			return -1;
+		}
+
+		/**
+		 * Find the index of a specific segment is found
+		 *   Can start the search at a specific offset
+		 * @return a signed integer where -1 means the value was not found
+		 */
+		int64 indexOf(^Container<Type> target, size_t startAt=0){
+			size_t seg = target.size();
+			size_t len = this.size() - seg;
+
+			// Search through the container till the target segment is found
+			while (startAt < len){
+				bool match = true;
+				for (size_t offset=0; offset<seg && match=true; offset++){
+					if (this[startAt + offset] != target[offset]){
+						match = false;
+					}
+				}
+
+				if (match){
+					return startAt;
+				}
+
+				startAt++;
+			}
+
+			return -1;
+		}
 }
 
 

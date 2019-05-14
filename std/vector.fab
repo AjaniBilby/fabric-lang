@@ -61,9 +61,20 @@ subject Vector(Type) extends Container<Type, 0>{
 		/**
 		 * Pushes the value to the vector
 		 */
-		void __add__(Vector<Type> value){
-			this.push(value);
-			return;
+		Vector<Type> __add__(Type value){
+			Vector<Type> res = this;
+			res.push(value);
+
+			return res;
+		}
+		/**
+		 * Pushes the other vector to the end of this one
+		 */
+		Vector<Type> __add__(Vector<Type> value){
+			Vector<Type> res = this;
+			res.concat(value);
+
+			return res;
 		}
 
 
@@ -133,7 +144,7 @@ subject Vector(Type) extends Container<Type, 0>{
 		 * Puts multiple items after the current last item.
 		 * @param The elements to be added.
 		 */
-		void append(@Vector<Type> value){
+		void concat(@Vector<Type> value){
 			size_t length = this.size();
 
 			// Resize the vector to fit the new elements
