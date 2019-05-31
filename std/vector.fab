@@ -144,7 +144,7 @@ subject Vector(Type) extends Container<Type, 0>{
 		 * Puts multiple items after the current last item.
 		 * @param The elements to be added.
 		 */
-		void concat(@Vector<Type> value){
+		void concat(^Container<Type> value){
 			size_t length = this.size();
 
 			// Resize the vector to fit the new elements
