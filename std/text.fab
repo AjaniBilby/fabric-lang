@@ -12,3 +12,6 @@ class Text extends Vector<ASCII_char>{
 	}
 	void toUpperCase(){}
 }
+
+expose ASCII_char;
+expose ASCII;
