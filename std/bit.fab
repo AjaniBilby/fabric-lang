@@ -1,0 +1,53 @@
+import "memory.fab" as Memory;
+
+Container<bool, 8> GetBits(uint8 byte){
+	Container<bool> out;
+
+	if (byte >= 128){
+		out[0] = true;
+		byte -= 128;
+	}
+	if (byte >= 64){
+		out[1] = true;
+		byte -= 64;
+	}
+	if (byte >= 32){
+		out[2] = true;
+		byte -= 32;
+	}
+	if (byte >= 16){
+		out[3] = true;
+		byte -= 16;
+	}
+	if (byte >= 8){
+		out[4] = true;
+		byte -= 8;
+	}
+	if (byte >= 4){
+		out[5] = true;
+		byte -= 4;
+	}
+	if (byte >= 2){
+		out[6] = true;
+		byte -= 2;
+	}
+	if (byte >= 1){
+		out[7] = true;
+	}
+
+	return out;
+}
+
+
+Vector<bool> GetBits(Memory.Heap target){
+	Vector<bool> out;
+
+	size_t items = target.size();
+	for (size_t i=0; i<items; i++){
+		out.concat( target[i] );
+	}
+
+	return out;
+}
+
+expose GetBits;

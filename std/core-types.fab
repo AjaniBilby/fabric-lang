@@ -1,3 +1,5 @@
+import "memory.fab" as Memory;
+
 class wild primative void {
 	/**
 	 * Make this object a bytewise duplicate of another
@@ -11,6 +13,14 @@ class wild primative void {
 
 		// Copy the data at a bytewise level
 		Memory.Duplicate(@other, @this, size);
+	}
+
+	/**
+	 * Returns a heap description of this object
+	 */
+	Memory.Heap getHeap(){
+		Memory.Heap out(@this, sizeof(this));
+		return out;
 	}
 }
 class void primative void {}
@@ -49,3 +59,16 @@ expose u8; expose u16; expose u32; expose u64;
 expose size_t;
 expose i8; expose i16; expose i32; expose i64;
 expose float; expose double;
+
+
+
+
+/**
+ * Returns the size of a given class
+ * @param the object or type who's size is in question.
+ * @returns the number of bytes
+ */
+size_t sizeof (^wild target) primative sizeof;
+
+
+expose sizeof;

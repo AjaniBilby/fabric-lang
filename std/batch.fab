@@ -1,0 +1,32 @@
+void Tick(): async{
+	return;
+}
+
+class Batch{
+	private:
+		size_t remain = 0;
+
+	public:
+		void Dispatch(size_t count = 1){
+			this.remain += count;
+		}
+
+		void TaskCompletion(){
+			if (remain > 1){
+				remain--;
+			}
+		}
+
+		void WaitComplete(): async{
+			while (true){
+				if (remain == 0){
+					return;
+				}
+
+				Tick();
+			}
+		}
+}
+
+
+expose Batch;

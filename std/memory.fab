@@ -1,4 +1,44 @@
 /**
+ * Describes a chunk of memory by location and length
+ */
+class Heap{
+	final:
+		size_t length;
+		@uint8 start;
+
+	public:
+		__constructor__(^@void start, size_t bytes){
+			this.start  = start;
+			this.length = bytes;
+		}
+
+		@uint8 __get__(size_t index){
+			return @this.start + index;
+		}
+
+		size_t size(){
+			return this.length;
+		}
+}
+
+
+class Claim{
+	private:
+		Heap ref;
+		bool active = true;
+	public:
+		__constructor__(Heap chunk){
+			this.ref = chunk;
+		}
+		__deconstructor__(){
+			if (this.active){
+				Free(this.ref.start);
+			}
+		}
+}
+
+
+/**
  * Allocates a heap of a specific size
  * @param The the size in bytes of desired space
  * @returns The address of a void at the beginning of the new heap
@@ -11,5 +51,6 @@
 */
 @void Free (@wild Address) primative Memory::UnAllocate;
 
+expose Heap;
 expose Allocate;
 expose Free;
