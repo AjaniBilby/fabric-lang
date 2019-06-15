@@ -4,7 +4,8 @@ import "vector.fab" as Memory;
 /**
  * A static length array defined at compile time
  */
-Subject Container(Type, Count){
+template <^Wild Type, Count>
+class Container{
 	public:
 		Bytes<Count> data;
 
