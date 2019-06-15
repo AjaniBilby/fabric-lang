@@ -1,4 +1,7 @@
-class Class{
+const Class = require('./class.js');
+
+
+class Subject{
 	constructor(owner, data){
 		this.owner = owner;
 	}
@@ -6,5 +9,3 @@ class Class{
 	link(){}
 	compile(){}
 }
-
-module.exports = Class;
