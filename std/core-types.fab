@@ -1,18 +1,10 @@
 import "memory.fab" as Memory;
 
 class wild primative void {
-	/**
-	 * Make this object a bytewise duplicate of another
-	 */
-	void InterpretFrom(^wild other){
-		// Get the width of data to be moved
-		size_t size = sizeof(this);
-		if (sizeof(other) < size){
-			size = sizeof(other);
-		}
-
-		// Copy the data at a bytewise level
-		Memory.Duplicate(@other, @this, size);
+	void __constructor__(){}
+	void __destructor__(){}
+	void __duplicate__(@wild other){
+		Memory::Duplicate(@this, @other, sizeof(this));
 	}
 
 	/**
@@ -29,7 +21,7 @@ class void primative void {}
 class bool primative bool {}
 
 
-class number                                 {}
+class Number primative double                {}
 
 class int    primative int    extends number {}
 class uint   primative        extends int    {}
@@ -68,7 +60,28 @@ expose float; expose double;
  * @param the object or type who's size is in question.
  * @returns the number of bytes
  */
-size_t sizeof (^wild target) primative sizeof;
-
-
+size_t sizeof(^wild target) primative sizeof;
 expose sizeof;
+
+
+
+
+/**
+ * Reinterpete one class as another
+ * Duplicate the bytewise information from one class to another
+ */
+template <^wild To>
+To Reinterpret(^wild value){
+	// Get the width of data to be moved
+	size_t size = sizeof(this);
+	if (sizeof(other) < size){
+		size = sizeof(other);
+	}
+
+	// Copy the data at a bytewise level
+	To out;
+	Memory.Duplicate(@out, @this, size);
+
+	return out;
+}
+expose Reinterpret;
