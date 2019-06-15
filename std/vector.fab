@@ -1,10 +1,13 @@
-import "container.fab" as Memory;
+import "container.fab" as *;
+
 import "memory.fab" as Memory;
+import "math.fab" as Math;
 
 /**
  * A variable length array
  */
-subject Vector(Type) extends Container<Type, 0>{
+template <Wild^ Type>
+class Vector extends Container<Type, 0>{
 	private:
 		size_t length;
 		size_t heap;
@@ -55,7 +58,7 @@ subject Vector(Type) extends Container<Type, 0>{
 				throw "Index error: cannot get element " + index.toString() + " of " + this.size.toString();
 			}
 
-			return this.reference + (index * sizeof(Type));
+			return @this.reference + index;
 		}
 
 		/**
@@ -100,14 +103,18 @@ subject Vector(Type) extends Container<Type, 0>{
 		 */
 		void reserve(size_t items){
 			@Type to = Memory.Allocate(items * sizeof(Type));
+			size_t length = this.size();
 
-			size_t min = items;
-			size_t length = this.capacity();
-			if (length < min){
-				min = length;
-			}
+			// Don't allow the vector to shrink pass the used items
+			items = Math.max(items, length);
 
+			// Transfer the vector elements to the new heap
 			Memory::Duplicate(@this.reference, @to, min);
+			// Wipe the previous vector heap.
+			Memory::Free(@this.reference);
+			// Mark the new heap as the vector's heap
+			@this.reference = @to;
+
 			return;
 		}
 
@@ -117,8 +124,17 @@ subject Vector(Type) extends Container<Type, 0>{
 		 * @param The number of items the vector should now hold.
 		 */
 		void resize(size_t items){
+			size_t length = this.size();
+
 			if (items > this.capacity()){
 				this.reserve(items);
+			}
+
+			/**
+			 * Safely destruct each item that will be removed
+			 */
+			for (size_t i=items; i<this.length; i++){
+				this[i].__destruct__();
 			}
 
 			this.length = items;
