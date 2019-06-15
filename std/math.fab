@@ -1,0 +1,150 @@
+/**
+ * Returns the largest of two values
+ */
+template<^Wild Type>
+Type Max(Type a, Type b){
+	if (a > b){
+		return a;
+	}else{
+		return b;
+	}
+}
+
+/**
+ * Returns the largest of a set of values
+ */
+template<^Wild Type>
+Type Max(^Container<Type> values){
+	size_t length = values.size();
+	size_t best = 0;
+	for (size_t i=1; i<length; i++){
+		if (values[i] > values[best]){
+			best = i;
+		}
+	}
+
+	return values[best];
+}
+
+
+
+
+
+/**
+ * Returns the smalles of two of values
+ */
+template<^Wild Type>
+Type Min(Type a, Type b){
+	if (a < b){
+		return a;
+	}else{
+		return b;
+	}
+}
+
+/**
+ * Returns the smalles of a set of values
+ */
+template<^Wild Type>
+Type Min(^Container<Type> values){
+	size_t length = values.size();
+	size_t best = 0;
+	for (size_t i=1; i<length; i++){
+		if (values[i] < values[best]){
+			best = i;
+		}
+	}
+
+	return values[best];
+}
+
+
+
+
+
+/**
+ * Returns the positive version of a supplied value
+ */
+template <Number^ Type> Type ABS(Type value){
+	if (value < 0){
+		return 0 - value;
+	}
+
+	return value;
+}
+
+
+
+
+template <^float Type>
+Type Modulus(Type value, Type divisor){
+	value = ABS(value);
+
+	while (value >= divisor){
+		value -= divisor;
+	}
+
+	return value;
+}
+
+template <^int Type> Modulus(Type value, Type divisor){
+	return value % divisor;
+}
+
+
+template <Number^ Type>
+Type Floor(Type value){
+	return value - Modulus(value, divisor);
+}
+
+template <Number^ Type>
+Type Ceil(Type value){
+	return value - Modulus(value, divisor);
+}
+
+template <Number^ Type>
+Type Round(Type value){
+	if (Modulus(value, divisor) > 0.5){
+		return Ceil(value);
+	}else{
+		return Floor(value);
+	}
+}
+
+
+
+
+
+/**
+ * Returns the value of PI encoded as a double
+ */
+double PI_Double(){
+	return 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
+}
+
+/**
+ * Returns the value of PI encoded as a float
+ */
+float PI(){
+	return 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
+}
+
+float E(){
+	return 2.718281828459045;
+}
+
+
+
+
+
+expose Max;
+expose Min;
+
+expose ABS;
+expose Modulus;
+expose Floor;
+expose Ceil;
+
+expose PI_Double;
+expose PI;
+expose E;
